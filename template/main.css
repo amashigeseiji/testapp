@@ -1,0 +1,54 @@
+body{
+  max-width:100%;
+  background-color:#99bbcc;
+  font-family:"Kozuka Gothic Pr6N EL";
+}
+
+#container{
+  width:70%;
+  margin: 0 auto;
+}
+
+#header{
+  padding:20px;
+}
+#header a:link,a:visited{
+  color:#000;
+  text-decoration:none;
+}
+
+#sidebar{
+  float:left;
+  width:20%;
+}
+#sidebar li{
+  list-style-type: none;
+}
+#sidebar a:link{
+  text-decoration:none;
+  color: #0090ea;
+}
+#sidebar a:visited{
+  text-decoration:none;
+  color: #0090ea;
+}
+#sidebar a:hover{
+  color: #d4a011;
+}
+
+#content{
+  float:left;
+  background-color:#aabbdd;
+  width:70%;
+  height:500px;
+  color:#fff;
+  padding:20px;
+}
+#content h3{
+  text-align:center;
+}
+#content p{
+}
+
+#footer{
+}
