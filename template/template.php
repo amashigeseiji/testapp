@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
   <link rel="stylesheet" type="text/css" href="template/main.css" />
-  <title><?php $action->showtitle(); ?></title>
+  <title><?php $this->showtitle(); ?></title>
 </head>
 
 <body>
@@ -14,12 +14,13 @@
 
     <div id="sidebar">
       <ul>
-        <?php $action->renderSideBar(6); ?>
+        <?php $this->renderSideBar(15); ?>
       </ul>
     </div>
 
     <div id="content">
-      <?php $action->renderContent(); ?>
+      <?php //$this->renderContent(); ?>
+      <?php $this->renderObjects(5); ?>
     </div>
 
     <div id="footer">

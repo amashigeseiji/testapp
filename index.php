@@ -2,6 +2,5 @@
 require_once("action.class.php");
 if(!isset($action))
 {
-  $action = new action;
+  $action = new Action;
 }
-$action->initialize();
