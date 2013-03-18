@@ -1,48 +1,47 @@
 <?php
-class BaseDataClass
+class BaseData
 {
-  private $data;
-  public $title = '';
-  public $deleteids = array();
-  public $delpath = 'data/del.dat';
+  private $basedata;
+  private $path;
+  public $errormessage = array();
+//  public $title = '';
+//  public $deleteids = array();
+//  public $delpath = 'data/del.dat';
+//  public $obj;
 //  public $body = '';
 //  public $lastid = '';
 
-  function __construct()
+  public function initialize()
   {
-    $this->initialize();
-    $this->getLastId();
-  }
+    $this->basedata = array();
 
-  private function initialize()
-  {
-    $this->data = array();
     $this->path = '';
     if (null == $this->path)
     {
      $this->setPath('./data/data.txt');
     }
+
     $lines = array();
     $lines = file($this->path);
 
     for ($i = 0; $i <= count($lines) -1; $i++)
     {
-      $this->data[$i] = explode(",", $lines[$i]);
+      $this->basedata[$i] = explode(",", $lines[$i]);
     }
-//    $this->getLastId();
-    //var_dump($this->data); exit;
-    $this->loadDeleteFlag();
+    //var_dump($this->basedata); exit;
+    //$this->loadDeleteFlag();
+    //$this->createData();
   }
 
   public function setPath($file)
   {
     if (file_exists($file) && is_dir($file))
     {
-      echo $file . " is directory.\n";
+      $this->errormessage[] .= $file . " is directory.";
     }
     elseif(!file_exists($file))
     {
-      echo $file . " is not exist.\n";
+      $this->errormessage[] .= $file . " is not exist.";
     }
     else
     {
@@ -50,11 +49,34 @@ class BaseDataClass
     }
   }
 
-  public function getTitle($id)
+  public function getIds()
+  {
+    $ids = array();
+    if ( $this->basedata[0][0] == $this->basedata[1][0])
+    {
+      $ids[0] = $this->basedata[0][0];
+    }
+    for ( $i = 1; $i <= count($this->basedata) -1; $i++)
+    {
+      if ( $this->basedata[$i][0] != null && $this->basedata[$i][0] != $this->basedata[$i-1][0] )
+      {
+        $ids[] .= $this->basedata[$i][0];
+      }
+    }
+
+    return $ids;
+  }
+
+  public function getLastId()
+  {
+    return max($this->getIds());
+  }
+
+  public function getTitleById($id)
   {
     $title = '';
-    $a = $this->data;
-    for ($i = 0; $i <= count($a) - 1; $i++)
+    $a = $this->basedata;
+    for ($i = 0; $i < count($a); $i++)
     {
       if ( $a[$i][0] == $id && $a[$i][1] == 'title')
       {
@@ -64,10 +86,10 @@ class BaseDataClass
     }
   }
 
-  public function getBody($id)
+  public function getBodyById($id)
   {
     $body = '';
-    $a = $this->data;
+    $a = $this->basedata;
     $tmp = array();
     for ($i = 0; $i <= count($a) - 1; $i++)
     {
@@ -82,16 +104,6 @@ class BaseDataClass
     }
 
     return $body;
-  }
-
-  public function getLastId()
-  {
-    $ids = array();
-    for ( $i = 0; $i <= count($this->data) -1; $i++)
-    {
-      $ids[] = $this->data[$i][0];
-    }
-    return max($ids);
   }
 
   //title データが body より先にくる想定
@@ -118,22 +130,24 @@ class BaseDataClass
     $this->initialize();
   }
 
-  //ナンカ違ウ…
-//  public function getDeleteFlagById($id)
-//  {
-//    for ( $i = 0; $i <= count($this->del) -1; $i++)
-//    {
-//      if ( $id == $this->deleteids[$i])
-//      {
-//        return 
-//      }
-//    }
-//  }
-
-  public function delete()
+  /*ナンカ違う…
+  public function getDeleteFlagById($id)
   {
-    $cmd = "cat data/data.txt | grep -v ^$id > data/data.txt";
+    for ( $i = 0; $i <= count($this->del) -1; $i++)
+    {
+      if ( $id == $this->deleteids[$i])
+      {
+        return 
+      }
+    }
+      }*/
+
+  public function delete($id)
+  {
+    $file = $this->path;
+    $cmd = "sh sandbox/delete.sh $file $id";
     shell_exec($cmd);
+    $this->initialize();
   }
 
   public function setDeleteFlag($id)
@@ -148,12 +162,11 @@ class BaseDataClass
   {
     $this->deleteids = array();
     $this->deleteids = file("$this->delpath");
-//    var_dump($this->deleteids); exit;
   }
 
   public function editTitle($id,$input)
   {
-    $title = $this->getTitle($id);
+    $title = $this->getTitleById($id);
     $title = $input["title"];
     $fp = fopen($this->path, "a");
     fwrite($fp, $this->getLastId() + 1 . ',' . 'title,' . $input . "\n");
@@ -164,14 +177,18 @@ class BaseDataClass
 
   public function editBody($id)
   {
-    $body = $this->getBody($id);
+    $body = $this->getBodyById($id);
   }
-}
 
-class DataClass extends BaseDataClass
-{
-  public $id = '';
-  public $title = '';
-  public $body = '';
-  private $delkey = false;
+  public function createData($id)
+  {
+    include_once('Data.class.php');
+    $obj = new Data;
+    $obj->setId($id);
+    $obj->setTitle($this->getTitleById($id));
+    $obj->setBody($this->getBodyById($id));
+
+    return $obj;
+  }
+
 }
