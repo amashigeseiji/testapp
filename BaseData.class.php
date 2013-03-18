@@ -4,11 +4,7 @@ class BaseData
   private $basedata;
   private $path;
   public $errormessage = array();
-//  public $title = '';
 //  public $deleteids = array();
-//  public $delpath = 'data/del.dat';
-//  public $obj;
-//  public $body = '';
 //  public $lastid = '';
 
   public function initialize()
@@ -67,6 +63,21 @@ class BaseData
     return $ids;
   }
 
+  public function isData($id)
+  {
+    //データがあれば true, なければ falseを返す
+    $ids = $this->getIds();
+    for($i = 0; $i < count($ids); $i++)
+    {
+      if ($ids[$i] == $id)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   public function getLastId()
   {
     return max($this->getIds());
@@ -75,15 +86,17 @@ class BaseData
   public function getTitleById($id)
   {
     $title = '';
-    $a = $this->basedata;
-    for ($i = 0; $i < count($a); $i++)
+    $basedata = $this->basedata;
+    for ($i = 0; $i < count($basedata); $i++)
     {
-      if ( $a[$i][0] == $id && $a[$i][1] == 'title')
+      if ( $basedata[$i][0] == $id && $basedata[$i][1] == 'title')
       {
-        return $title = $a[$i][2];
-        break;
+        return $title = $basedata[$i][2];
       }
     }
+
+    $this->errormessage[] .= $id. 'is null.';
+    return null;
   }
 
   public function getBodyById($id)
@@ -130,38 +143,12 @@ class BaseData
     $this->initialize();
   }
 
-  /*ナンカ違う…
-  public function getDeleteFlagById($id)
-  {
-    for ( $i = 0; $i <= count($this->del) -1; $i++)
-    {
-      if ( $id == $this->deleteids[$i])
-      {
-        return 
-      }
-    }
-      }*/
-
   public function delete($id)
   {
     $file = $this->path;
     $cmd = "sh sandbox/delete.sh $file $id";
     shell_exec($cmd);
     $this->initialize();
-  }
-
-  public function setDeleteFlag($id)
-  {
-    $fp = fopen("$this->delpath","a");
-    fwrite($fp, $id);
-    fclose($fp);
-    $this->loadDeleteFlag();
-  }
-
-  public function loadDeleteFlag()
-  {
-    $this->deleteids = array();
-    $this->deleteids = file("$this->delpath");
   }
 
   public function editTitle($id,$input)
@@ -182,13 +169,19 @@ class BaseData
 
   public function createData($id)
   {
-    include_once('Data.class.php');
-    $obj = new Data;
-    $obj->setId($id);
-    $obj->setTitle($this->getTitleById($id));
-    $obj->setBody($this->getBodyById($id));
+    if($this->isData($id) == true)
+    {
+      include_once('Data.class.php');
+      $obj = new Data;
+      $obj->setId($id);
+      $obj->setTitle($this->getTitleById($id));
+      $obj->setBody($this->getBodyById($id));
 
-    return $obj;
+      return $obj;
+    }
   }
 
 }
+$a= new BaseData;
+$a->initialize();
+var_dump($a->isData(111));
