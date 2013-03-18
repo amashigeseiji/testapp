@@ -1,34 +1,109 @@
 <?php
-class action
+class Action
 {
+  public $message = array();
+  public $id = '';
+  public $input;
+  public $template = 'template/template.php';
+
+  function __construct()
+  {
+    $this->initialize();
+  }
+
   public function initialize()
   {
     $this->obj = "";
+    $this->id = '';
+    $this->input = null;
+    $this->deleteid = '';
+
     $this->createInstance();
+    $this->obj->initialize();
+
     $this->chkPost();
-    $this->callTemplate("template/template.php");
+    if(array_key_exists($this->deleteid,$_POST))
+    {
+    var_dump($this->deleteid); exit;
+    }
+    if (null != $this->deleteid)
+    {
+      $this->delete($this->deleteid);
+    }
+    if (null != $this->input)
+    {
+      $this->writeData($this->input);
+    //  return $this->callTemplate($this->template);
+    }
+    if(isset($this->message))
+    {
+      for( $i = 0; $i < count($this->message); $i++ )
+      {
+        echo $this->message[$i];
+      }
+    }
+
+    $this->getId();
+    if (isset($this->id))
+    {
+      return $this->callTemplate($this->template);
+    }
   }
 
   public function createInstance()
   {
-    include('BaseData.class.php');
-    $this->obj = new BaseDataClass;
+    include_once('BaseData.class.php');
+    $this->obj = new BaseData;
   }
 
-  public function showDataById($id)
+  public function getId()
   {
-    $this->showTitleById($id);
-    $this->showBodyById($id);
+    if (array_key_exists("id",$_GET))
+    {
+      return $this->id = $_GET["id"];
+    }
+    else
+    {
+      return $this->id = '';
+    }
   }
 
-  public function showTitleById($id)
+  public function chkPost()
   {
-    return $this->obj->getTitle($id);
+    if(array_key_exists("delete",$_POST))
+    {
+      var_dump($_POST); exit;
+      return $this->deleteid = $_POST["delete"];
+    }
+    elseif(array_key_exists("body",$_POST) && array_key_exists("title",$_POST))
+    {
+      if ($_POST['title'] == null)
+      {
+        return $this->message[] .= 'タイトルを入力してください.';
+      }
+      elseif($_POST['body'] == null)
+      {
+        return $this->message[] .= '本文を入力してください.';
+      }
+      else
+      {
+        return $this->input = $_POST;
+      }
+    }
+    else
+    {
+      return $this->input = null;
+    }
+  }
+
+  public function renderTitle($id)
+  {
+    return htmlspecialchars($this->obj->getTitleById($id));
   }
 
   public function renderBody($id)
   {
-    $body = $this->obj->getBody($id);
+    $body = $this->obj->getBodyById($id);
     return $body = str_replace(array("\r\n","\r","\n"),'<br />',$body);
   }
 
@@ -38,11 +113,6 @@ class action
     $this->obj->writeBody($input["body"]);
   }
 
-  public function getLastId()
-  {
-    return $this->obj->getLastId();
-  }
-
   public function showTitle()
   {
     $id = $this->getId();
@@ -50,7 +120,7 @@ class action
     if(!$id){
       echo $title;
     }else{
-      echo $title = $this->showTitleById($id);
+      echo $title = $this->renderTitle($id);
     }
   }
 
@@ -65,7 +135,7 @@ class action
 
   public function callTemplate($a)
   {
-    include($a);
+    include_once($a);
   }
 
   public function renderContent()
@@ -78,7 +148,7 @@ class action
     else
     {
      echo '<h3>title : ';
-     echo $this->showTitleById($id);
+     echo $this->renderTitle($id);
      echo '</h3>';
      echo '<p>';
      echo $this->renderBody($id);
@@ -89,54 +159,56 @@ class action
 
   public function renderSideBar($num)
   {
-    for ($i = $this->getLastId(); $i > $this->getLastId() - $num; $i--)
+    for ($i = $this->obj->getLastId(); $i > $this->obj->getLastId() - $num; $i-- )
     {
       echo "<li><a href=index.php".'?id='.$i.">";
-      echo $this->showTitleById($i);
+      echo $this->renderTitle($i);
       echo '</a></li>';
     }
   }
 
-  public function getId()
+  public function createObjects($num)
   {
-    if (array_key_exists("id",$_GET))
+    $objects = array();
+    for ( $i = $this->obj->getLastId(); $i > $this->obj->getLastId() - $num; $i-- )
     {
-      return $_GET["id"];
+      $objects[$i] = $this->obj->createData($i);
     }
-    else
+
+    return $objects;
+  }
+
+  public function renderObjects($num)
+  {
+    $objects = $this->createObjects($num);
+    for ( $i = $this->obj->getLastId(); $i > $this->obj->getLastId() - $num; $i-- )
     {
-      return;
+      echo '<form action="#" method="post">';
+      echo '<table class="objects">';
+      echo '<tr class="title">';
+      echo '<th class="title">title</th>';
+      echo '<td>';
+      echo $objects[$i]->getTitle();
+      echo '</td>';
+      echo '</tr>';
+      echo '<tr>';
+      echo '<td colspan="2">';
+      echo str_replace(array("\r\n","\r","\n"),'<br />',$objects[$i]->getBody());
+      echo '</td>';
+      echo '</tr>';
+      echo '<tr>';
+      echo '<td class="delete" colspan="2">';
+      echo '<input type="hidden" value="' . $i . '" name="delete" />';
+      echo '<input type="submit" value="削除" />';
+      echo '</td>';
+      echo '</tr>';
+      echo '</table>';
+      echo '</form>';
     }
   }
 
-  public function chkPost()
+  public function delete($id)
   {
-    $message = array();
-    if (isset($_POST))
-    {
-      if(array_key_exists("body",$_POST) && array_key_exists("title",$_POST))
-      {
-        if ($_POST['title'] == null)
-        {
-          $message[] .= 'タイトルを入力してください.';
-        }
-        elseif($_POST['body'] == null)
-        {
-          $message[] .= '本文を入力してください.';
-        }
-        else
-        {
-          $this->writeData($_POST);
-        }
-      }
-      if(isset($message))
-      {
-        for( $i = 0; $i < count($message); $i++ )
-        {
-          echo $message[$i];
-        }
-      }
-    }
+    $this->obj->delete($id);
   }
-
 }
