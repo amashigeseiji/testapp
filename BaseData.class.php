@@ -130,6 +130,12 @@ class BaseDataClass
 //    }
 //  }
 
+  public function delete()
+  {
+    $cmd = "cat data/data.txt | grep -v ^$id > data/data.txt";
+    shell_exec($cmd);
+  }
+
   public function setDeleteFlag($id)
   {
     $fp = fopen("$this->delpath","a");
@@ -160,4 +166,12 @@ class BaseDataClass
   {
     $body = $this->getBody($id);
   }
+}
+
+class DataClass extends BaseDataClass
+{
+  public $id = '';
+  public $title = '';
+  public $body = '';
+  private $delkey = false;
 }
