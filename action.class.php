@@ -6,6 +6,7 @@ class Action
   public $input;
   public $deleteid;
   public $template = 'template/template.php';
+  public $objects;
 
   function __construct()
   {
@@ -14,10 +15,12 @@ class Action
 
   public function initialize()
   {
-    $this->obj = "";
-    $this->id = '';
+    $this->obj = null;
+    $this->id = null;
     $this->input = null;
     $this->deleteid = null;
+    $this->objects = null;
+    $this->message = null;
 
     $this->createInstance();
     $this->obj->initialize();
@@ -35,7 +38,7 @@ class Action
     {
       for( $i = 0; $i < count($this->message); $i++ )
       {
-        echo $this->message[$i];
+        echo $this->message[$i] . "<br />";
       }
     }
 
@@ -45,6 +48,7 @@ class Action
 //      return $this->callTemplate($this->template);
 //    }
 
+    $this->createObjects(20);
     $this->callTemplate($this->template);
   }
 
@@ -68,30 +72,56 @@ class Action
 
   public function chkPost()
   {
-    if(array_key_exists("delete",$_POST))
+    switch(true)
     {
-      $this->deleteid = $_POST["delete"];
+      case (array_key_exists("delete",$_POST) == true):
+       $this->deleteid = $_POST["delete"];
+       break;
+
+      case (array_key_exists("body",$_POST) == true && array_key_exists("title",$_POST) == true):
+       if ($_POST['title'] == null)
+       {
+         $this->message[] .= 'タイトルを入力してください.';
+       }
+       if($_POST['body'] == null)
+       {
+         $this->message[] .= '本文を入力してください.';
+       }
+       if ($_POST['title'] != null && $_POST['body'] != null)
+       {
+         $this->input = $_POST;
+       }
+       break;
+
+      default:
+       $this->input = null;
+       $this->deleteid = null;
     }
-    elseif(array_key_exists("body",$_POST) && array_key_exists("title",$_POST))
-    {
-      if ($_POST['title'] == null)
-      {
-        $this->message[] .= 'タイトルを入力してください.';
-      }
-      elseif($_POST['body'] == null)
-      {
-        $this->message[] .= '本文を入力してください.';
-      }
-      else
-      {
-        $this->input = $_POST;
-      }
-    }
-    else
-    {
-      $this->input = null;
-      $this->deleteid = null;
-    }
+
+//    if(array_key_exists("delete",$_POST))
+//    {
+//      $this->deleteid = $_POST["delete"];
+//    }
+//    elseif(array_key_exists("body",$_POST) && array_key_exists("title",$_POST))
+//    {
+//      if ($_POST['title'] == null)
+//      {
+//        $this->message[] .= 'タイトルを入力してください.';
+//      }
+//      elseif($_POST['body'] == null)
+//      {
+//        $this->message[] .= '本文を入力してください.';
+//      }
+//      else
+//      {
+//        $this->input = $_POST;
+//      }
+//    }
+//    else
+//    {
+//      $this->input = null;
+//      $this->deleteid = null;
+//    }
   }
 
   public function renderTitle($id)
@@ -159,7 +189,7 @@ class Action
   {
     for ($i = $this->obj->getLastId(); $i > $this->obj->getLastId() - $num; $i-- )
     {
-      echo "<li><a href=index.php".'?id='.$i.">";
+      echo '<li><a href=index.php'.'?id='.$i.'>';
       echo $this->renderTitle($i);
       echo '</a></li>';
     }
@@ -167,62 +197,59 @@ class Action
 
   public function createObjects($num)
   {
-    $objects = array();
+    $this->objects = null;
     $ids = $this->obj->getIds();
     for ( $i = $this->obj->getLastId(); $i > count($ids) - $num; $i-- )
     {
-      if($this->obj->isData($i) == false)
+      if($this->obj->isData($i) != false)
       {
-        $i--;
-      }
-      else
-      {
-        $objects[$i] = $this->obj->createData($i);
+        $this->objects[$i] = $this->obj->createData($i);
       }
     }
-
-    return $objects;
   }
 
-  public function renderObjects($num)
+  public function renderObjects()
   {
-    $objects = $this->createObjects($num);
     $ids = $this->obj->getIds();
-    for ( $i = $this->obj->getLastId(); $i > count($ids) - $num; $i-- )
+   // for ( $i = $this->obj->getLastId(); $i > count($ids) - $num; $i-- )
+    foreach ($this->objects as $key => $value)
     {
-      if($this->obj->isData($i) == false)
-      {
-        $i--;
-      }
-      else
-      {
+     // if($this->obj->isData($i) == false)
+     // {
+     //   $i--;
+     // }
+     // else
+     // {
         echo '<form action="#" method="post">';
         echo '<table class="objects">';
         echo '<tr class="title">';
-        echo '<th class="title">title</th>';
+        echo '<th class="title">';
+        echo $this->objects[$key]->getId();
+        echo '</th>';
         echo '<td>';
-        echo $objects[$i]->getTitle();
+        echo $this->objects[$key]->getTitle();
         echo '</td>';
         echo '</tr>';
         echo '<tr>';
         echo '<td colspan="2">';
-        echo str_replace(array("\r\n","\r","\n"),'<br />',$objects[$i]->getBody());
+        echo str_replace(array("\r\n","\r","\n"),'<br />',$this->objects[$key]->getBody());
         echo '</td>';
         echo '</tr>';
         echo '<tr>';
         echo '<td class="delete" colspan="2">';
-        echo '<input type="hidden" value="' . $i . '" name="delete" />';
+        echo '<input type="hidden" value="' . $key . '" name="delete" />';
         echo '<input type="submit" value="削除" />';
         echo '</td>';
         echo '</tr>';
         echo '</table>';
         echo '</form>';
-      }
+     // }
     }
   }
 
   public function delete($id)
   {
     $this->obj->delete($id);
+    $this->deleteid = null;
   }
 }
