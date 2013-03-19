@@ -14,7 +14,7 @@ class BaseData
     $this->path = '';
     if (null == $this->path)
     {
-     $this->setPath('./data/data.txt');
+     $this->setPath($this->defaultpath);
     }
 
     $lines = array();
@@ -153,19 +153,20 @@ class BaseData
 
   public function delete($id)
   {
-    $file = $this->path;
-    $cmd = "sh sandbox/delete.sh $file $id";
-    shell_exec($cmd);
+    $data = file($this->path);
+    $deleted = preg_grep("/^$id,/",$data,PREG_GREP_INVERT);
+    $fp = fopen($this->path,"w");
+    foreach ($deleted as $key => $value)
+    {
+      fwrite($fp,$deleted[$key]);
+    }
+    fclose($fp);
+
     $this->initialize();
   }
 
   public function editTitle($id,$input)
   {
-    $title = $this->getTitleById($id);
-    $title = $input["title"];
-    $fp = fopen($this->path, "a");
-    fwrite($fp, $this->getLastId() + 1 . ',' . 'title,' . $input . "\n");
-    fclose($fp);
     //データの更新
     $this->initialize();
   }
