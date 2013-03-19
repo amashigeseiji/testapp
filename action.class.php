@@ -16,16 +16,12 @@ class Action
     $this->obj = "";
     $this->id = '';
     $this->input = null;
-    $this->deleteid = '';
+    $this->deleteid = null;
 
     $this->createInstance();
     $this->obj->initialize();
 
     $this->chkPost();
-    if(array_key_exists($this->deleteid,$_POST))
-    {
-    var_dump($this->deleteid); exit;
-    }
     if (null != $this->deleteid)
     {
       $this->delete($this->deleteid);
@@ -72,27 +68,27 @@ class Action
   {
     if(array_key_exists("delete",$_POST))
     {
-      var_dump($_POST); exit;
-      return $this->deleteid = $_POST["delete"];
+      $this->deleteid = $_POST["delete"];
     }
     elseif(array_key_exists("body",$_POST) && array_key_exists("title",$_POST))
     {
       if ($_POST['title'] == null)
       {
-        return $this->message[] .= 'タイトルを入力してください.';
+        $this->message[] .= 'タイトルを入力してください.';
       }
       elseif($_POST['body'] == null)
       {
-        return $this->message[] .= '本文を入力してください.';
+        $this->message[] .= '本文を入力してください.';
       }
       else
       {
-        return $this->input = $_POST;
+        $this->input = $_POST;
       }
     }
     else
     {
-      return $this->input = null;
+      $this->input = null;
+      $this->deleteid = null;
     }
   }
 
@@ -172,7 +168,13 @@ class Action
     $objects = array();
     for ( $i = $this->obj->getLastId(); $i > $this->obj->getLastId() - $num; $i-- )
     {
-      $objects[$i] = $this->obj->createData($i);
+      if($objects[$i] == null)
+      {
+        return $i--;
+      }
+      else{
+        $objects[$i] = $this->obj->createData($i);
+      }
     }
 
     return $objects;

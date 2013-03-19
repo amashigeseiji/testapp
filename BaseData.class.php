@@ -3,8 +3,8 @@ class BaseData
 {
   private $basedata;
   private $path;
+  private $defaultpath = 'data/data.txt';
   public $errormessage = array();
-//  public $deleteids = array();
 //  public $lastid = '';
 
   public function initialize()
@@ -25,8 +25,6 @@ class BaseData
       $this->basedata[$i] = explode(",", $lines[$i]);
     }
     //var_dump($this->basedata); exit;
-    //$this->loadDeleteFlag();
-    //$this->createData();
   }
 
   public function setPath($file)
@@ -34,14 +32,16 @@ class BaseData
     if (file_exists($file) && is_dir($file))
     {
       $this->errormessage[] .= $file . " is directory.";
+      return $this->path = $this->defaultpath;
     }
     elseif(!file_exists($file))
     {
       $this->errormessage[] .= $file . " is not exist.";
+      return $this->path = $this->defaultpath;
     }
     else
     {
-      return $this->path = $file;
+      $this->path = $file;
     }
   }
 
@@ -111,12 +111,20 @@ class BaseData
         $tmp[] = $a[$i][2];
       }
     }
-    for ( $i = 0; $i <= count($tmp) -1; $i++)
+    if (isset($tmp))
     {
-      $body .= $tmp[$i];
-    }
+     for ( $i = 0; $i <= count($tmp) -1; $i++)
+     {
+       $body .= $tmp[$i];
+     }
 
-    return $body;
+      return $body;
+    }
+    else
+    {
+      $this->errormessage[] .= $id. 'is null.';
+      return null;
+    }
   }
 
   //title データが body より先にくる想定
@@ -182,6 +190,3 @@ class BaseData
   }
 
 }
-$a= new BaseData;
-$a->initialize();
-var_dump($a->isData(111));
