@@ -32,12 +32,12 @@ class BaseData
     if (file_exists($file) && is_dir($file))
     {
       $this->errormessage[] .= $file . " is directory.";
-      return $this->path = $this->defaultpath;
+      $this->path = $this->defaultpath;
     }
     elseif(!file_exists($file))
     {
       $this->errormessage[] .= $file . " is not exist.";
-      return $this->path = $this->defaultpath;
+      $this->path = $this->defaultpath;
     }
     else
     {

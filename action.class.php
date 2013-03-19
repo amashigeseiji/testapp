@@ -2,8 +2,9 @@
 class Action
 {
   public $message = array();
-  public $id = '';
+  public $id;
   public $input;
+  public $deleteid;
   public $template = 'template/template.php';
 
   function __construct()
@@ -29,7 +30,6 @@ class Action
     if (null != $this->input)
     {
       $this->writeData($this->input);
-    //  return $this->callTemplate($this->template);
     }
     if(isset($this->message))
     {
@@ -39,11 +39,13 @@ class Action
       }
     }
 
-    $this->getId();
-    if (isset($this->id))
-    {
-      return $this->callTemplate($this->template);
-    }
+//    $this->id = $this->getId();
+//    if (null != $this->id)
+//    {
+//      return $this->callTemplate($this->template);
+//    }
+
+    $this->callTemplate($this->template);
   }
 
   public function createInstance()
@@ -56,11 +58,11 @@ class Action
   {
     if (array_key_exists("id",$_GET))
     {
-      return $this->id = $_GET["id"];
+      return $_GET["id"];
     }
     else
     {
-      return $this->id = '';
+      return null;
     }
   }
 
@@ -166,13 +168,15 @@ class Action
   public function createObjects($num)
   {
     $objects = array();
-    for ( $i = $this->obj->getLastId(); $i > $this->obj->getLastId() - $num; $i-- )
+    $ids = $this->obj->getIds();
+    for ( $i = $this->obj->getLastId(); $i > count($ids) - $num; $i-- )
     {
-      if($objects[$i] == null)
+      if($this->obj->isData($i) == false)
       {
-        return $i--;
+        $i--;
       }
-      else{
+      else
+      {
         $objects[$i] = $this->obj->createData($i);
       }
     }
@@ -183,29 +187,37 @@ class Action
   public function renderObjects($num)
   {
     $objects = $this->createObjects($num);
-    for ( $i = $this->obj->getLastId(); $i > $this->obj->getLastId() - $num; $i-- )
+    $ids = $this->obj->getIds();
+    for ( $i = $this->obj->getLastId(); $i > count($ids) - $num; $i-- )
     {
-      echo '<form action="#" method="post">';
-      echo '<table class="objects">';
-      echo '<tr class="title">';
-      echo '<th class="title">title</th>';
-      echo '<td>';
-      echo $objects[$i]->getTitle();
-      echo '</td>';
-      echo '</tr>';
-      echo '<tr>';
-      echo '<td colspan="2">';
-      echo str_replace(array("\r\n","\r","\n"),'<br />',$objects[$i]->getBody());
-      echo '</td>';
-      echo '</tr>';
-      echo '<tr>';
-      echo '<td class="delete" colspan="2">';
-      echo '<input type="hidden" value="' . $i . '" name="delete" />';
-      echo '<input type="submit" value="削除" />';
-      echo '</td>';
-      echo '</tr>';
-      echo '</table>';
-      echo '</form>';
+      if($this->obj->isData($i) == false)
+      {
+        $i--;
+      }
+      else
+      {
+        echo '<form action="#" method="post">';
+        echo '<table class="objects">';
+        echo '<tr class="title">';
+        echo '<th class="title">title</th>';
+        echo '<td>';
+        echo $objects[$i]->getTitle();
+        echo '</td>';
+        echo '</tr>';
+        echo '<tr>';
+        echo '<td colspan="2">';
+        echo str_replace(array("\r\n","\r","\n"),'<br />',$objects[$i]->getBody());
+        echo '</td>';
+        echo '</tr>';
+        echo '<tr>';
+        echo '<td class="delete" colspan="2">';
+        echo '<input type="hidden" value="' . $i . '" name="delete" />';
+        echo '<input type="submit" value="削除" />';
+        echo '</td>';
+        echo '</tr>';
+        echo '</table>';
+        echo '</form>';
+      }
     }
   }
 
