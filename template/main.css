@@ -1,6 +1,6 @@
 body{
   max-width:100%;
-  background-color:#99bbcc;
+  background-color:#a0b0b5;
   font-family:"Kozuka Gothic Pr6N EL";
 }
 
@@ -26,22 +26,23 @@ body{
 }
 #sidebar a:link{
   text-decoration:none;
-  color: #0090ea;
+  color: #005090;
 }
 #sidebar a:visited{
   text-decoration:none;
-  color: #0090ea;
+  color: #005090;
 }
 #sidebar a:hover{
-  color: #d4a011;
+  color: #b48011;
 }
 
 #content{
-  float:left;
-  background-color:#aabbdd;
-  width:70%;
-  height:500px;
-  color:#fff;
+  border-radius:8px;
+  background-color:#bbbfdd;
+  width:auto;
+  height:auto;
+  color:#555;
+  margin:10px 10px;
   padding:20px;
 }
 #content h3{
@@ -49,6 +50,74 @@ body{
 }
 #content p{
 }
+#content table{
+  margin:20px auto;
+  width:700px;
+  border-collapse:collapase;
+  border:0px;
+  border-radius: 8px;
+  word-wrap:break-word;
+}
+#content a:link,a:visited{
+  text-decoration:none;
+  color: #005090;
+}
+#content a:hover{
+  color: #b48011;
+}
+td{
+  font-style:normal;
+  background-color: #ddd;
+  padding:5px 15px;
+  margin:0px;
+  border-radius: 8px;
+}
+th{
+  font-style:normal;
+  background-color: #aaa;
+  padding:5px;
+  margin:0px;
+  border-radius: 8px;
+}
 
+table.objects{
+  margin:15px;
+  width:90%;
+}
+th.title{
+  font-family:"Kozuka Gothic Pr6N EL";
+  width:50px;
+}
+td.delete{
+  text-align:center;
+}
+#write{
+  margin:0px 10px;
+  padding:10px 0px;
+  background-color:#707070;
+  border-radius: 8px;
+}
+
+td.error{
+  color: #a55;
+  padding: 0px;
+  text-align:center;
+  background-color:#fff;
+
+}
+
+#objectpage{
+  border-radius:8px;
+  background-color:#bbbfdd;
+  width:auto;
+  height:auto;
+  color:#555;
+  margin:10px 10px;
+  padding:20px;
+}
+#objectpage table{
+  margin:15px;
+  width:90%;
+}
 #footer{
 }
