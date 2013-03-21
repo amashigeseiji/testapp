@@ -259,30 +259,32 @@ class Action
   /*
    * objectpageに一覧を表示
    */
-  public function renderObjects($objects)
+  public function renderObjects($n)
   {
     if ( $this->objects != null )
     {
-      foreach ($this->objects as $key => $value)
+      for ( $i = $this->obj->getLastId(); $i > count($this->objects) - $n; $i-- )
       {
-          echo '<form action="#" method="post">';
+        if ( $this->isObject($i) )
+        {
+          //echo '<form action="#" method="post">';
           echo '<table class="objects">';
           echo '<tr class="title">';
           echo '<th class="title">';
-          echo $this->objects[$key]->getId();
+          echo $this->object->getId();
           echo '</th>';
           echo '<td>';
           echo '<a href="index.php'.'?id=';
-          echo $this->objects[$key]->getId();
+          echo $this->object->getId();
           echo '">';
-          echo $this->objects[$key]->getTitle();
+          echo $this->object->getTitle();
           echo '</a>';
           echo '</td>';
           echo '</tr>';
           echo '<tr>';
           echo '<td colspan="2">';
           echo '<p>';
-          echo $this->renderBody($this->objects[$key]->getBody());
+          echo $this->renderBody($this->object->getBody());
           echo '</p>';
           echo '</td>';
           echo '</tr>';
@@ -293,7 +295,12 @@ class Action
           //echo '</td>';
           //echo '</tr>';
           echo '</table>';
-          echo '</form>';
+          //echo '</form>';
+        }
+        else
+        {
+          $n + 1;
+        }
       }
     }
     else
