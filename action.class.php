@@ -3,11 +3,10 @@ class Action
 {
   private
     $message = array(),
-    $input,
     $pagetitle,
     $defaulttitle = 'testpage',
-    $deleteid,
     $template = 'template/template.php',
+    $object,
     $objects,
     $objectsnum,
     $submited,
@@ -20,11 +19,13 @@ class Action
 
   public function initialize()
   {
+    //TODO メッセージ出力をもうちょい細かく制御する
+    //現状だと削除時に削除メッセージと同時に
+    //idが存在しない旨表示されてしまう
     $this->message = array();
     $this->obj = null;
-    $this->input = null;
     $this->pagetitle = '';
-    $this->deleteid = null;
+    $this->object = null;
     $this->objects = null;
     $this->objectsnum = 0;
     $this->submited = array(
@@ -35,40 +36,116 @@ class Action
     $this->pageid = '';
 
     $this->createInstance();
-    $this->obj->initialize();
 
-    $this->chkPost();
+    $this->setObjects($this->objectsnum);
+    $this->setSubmited();
+    //データの書き込み処理
     if ( null != $this->submited['delete'] )
     {
-      $this->delete($this->submited['delete']);
+      $this->delete($this->getId());
+      $this->setObjects($this->objectsnum);
     }
     if ( null != $this->submited['title'] && null != $this->submited['body'] )
     {
       $this->writeData($this->submited);
+      $this->setObjects($this->objectsnum);
     }
 
     $this->setPageId();
     $this->setPageTitle();
-    $this->setObjectsNum(20);
-    if ($this->objectsnum != 0)
-    {
-      $this->createObjects($this->objectsnum);
-    }
-
     $this->callTemplate($this->template);
   }
 
-  public function createInstance()
+  private function createInstance()
   {
     include_once('BaseData.class.php');
     $this->obj = new BaseData;
+    $this->obj->initialize();
+  }
+
+  /* setObjectNumで0を渡した場合、
+   * 必ず$this->objectnumには0が設定される
+   * createObjectsにも0が渡されるので
+   * 全件出力になる
+   */
+  private function setObjects($num)
+  {
+    $this->objects = null;
+    $this->setObjectsNum($num);
+    $this->createObjects($this->objectsnum);
+  }
+
+  private function createObjects($num)
+  {
+    $this->objects = null;
+    $ids = $this->obj->getIds();
+    //$numに0が入っていれば全件出力
+    //次のfor文でのforの終了条件を0にする
+    if ( $num == 0 )
+    {
+      $num = count($ids);
+    }
+    //$numが0以外であれば$num件出力
+    //setObjectNumでidsの検査はしているので
+    //データが無い旨のメッセージ出力は不要だが
+    //データがなくてもエラーとは言えないためidsが空でここにくることはある
+    //
+    if ( !empty($ids) );
+    {
+      for ( $i = $this->obj->getLastId(); $i > count($ids) - $num; $i-- )
+      {
+        if($this->obj->isData($i) != false)
+        {
+          $this->objects[$i] = $this->obj->createData($i);
+        }
+        else
+        {
+          $num + 1;
+        }
+      }
+    }
+  }
+
+  /*
+   * $numに0を渡した場合、
+   * 配列要素($ids = データ)があるなら必ず最終条件にくるので、
+   * 0が渡されたらかならず0を返す
+   * setObjectNum()に0以外の値を渡し、かつ配列要素が存在するときのみ、
+   * $objectnumに値が代入される
+   */
+  public function setObjectsNum($num)
+  {
+    $this->objectsnum = 0;
+    $ids = $this->obj->getIds();
+    if ( empty($ids) )
+    {
+      $this->message['nodata'] = 'NO DATA';
+      $this->objectsnum = 0;
+    }
+    elseif ( $num > count($ids) )
+    {
+      $this->objectsnum = count($ids);
+    }
+    else
+    {
+      $this->objectsnum = $num;
+    }
   }
 
   public function getId()
   {
+    //getの処理が甘いみたいなので修正する
     if (array_key_exists("id",$_GET))
     {
-      return $_GET["id"];
+      if ( $this->obj->isData($_GET['id']))
+      {
+        return $_GET["id"];
+      }
+      else
+      {
+        $this->message['id'] = 'id' . $_GET["id"] . 'は存在しないデータです。';
+        return null;
+      }
     }
     else
     {
@@ -76,7 +153,7 @@ class Action
     }
   }
 
-  public function chkPost()
+  public function setSubmited()
   {
     switch(true)
     {
@@ -101,44 +178,20 @@ class Action
        break;
 
       default:
-       $this->input = null;
-       $this->deleteid = null;
+       $this->submited['title'] = '';
+       $this->submited['body'] = '';
+       $this->submited['delete'] = '';
     }
-
-//    if(array_key_exists("delete",$_POST))
-//    {
-//      $this->deleteid = $_POST["delete"];
-//    }
-//    elseif(array_key_exists("body",$_POST) && array_key_exists("title",$_POST))
-//    {
-//      if ($_POST['title'] == null)
-//      {
-//        $this->message[] .= 'タイトルを入力してください.';
-//      }
-//      elseif($_POST['body'] == null)
-//      {
-//        $this->message[] .= '本文を入力してください.';
-//      }
-//      else
-//      {
-//        $this->input = $_POST;
-//      }
-//    }
-//    else
-//    {
-//      $this->input = null;
-//      $this->deleteid = null;
-//    }
   }
 
-  public function escapeText($text)
+  public function escape($text)
   {
     return htmlspecialchars($text);
   }
 
   public function renderBody($text)
   {
-    return str_replace(array("\r\n","\r","\n"),'<br />',$text);
+    return str_replace(array("\r\n","\r","\n"),'<br />',$this->escape($text));
   }
 
   public function writeData($input)
@@ -146,7 +199,7 @@ class Action
     if ( $this->obj->writeTitle($input["title"]) == true )
     {
       $this->obj->writeBody($input["body"]);
-      $this->obj->writeDate();
+      $this->obj->writeCreatedAt();
     }
     else
     {
@@ -189,88 +242,24 @@ class Action
     }
   }
 
-  public function callHtml($a)
+  public function callHtml($file)
   {
-    $template = file($a);
+    $template = file($file);
     for ( $i = 0; $i < count($template); $i++ )
     {
       print $template[$i];
     }
   }
 
-  public function callTemplate($a)
+  public function callTemplate($file)
   {
-    include_once($a);
+    include_once($file);
   }
 
-  public function renderContent()
-  {
-    if ( $this->pageid == '' )
-    {
-      //$this->callHtml("template/inputform.html");
-      $this->callTemplate('template/inputform.php');
-    }
-    else
-    {
-      echo '<form action="#" method="post">';
-      echo '<h4>&nbsp;title : ';
-      echo $this->escapeText($this->obj->getTitleById($this->pageid));
-      echo '</h4>';
-      echo '<p>';
-      echo $this->renderBody($this->pageid);
-      echo '</p>';
-      echo '<input type="hidden" value="' . $this->pageid . '" name="delete" />';
-      echo '<input type="submit" value="削除" />';
-      echo '</form>';
-    }
-  }
-
-  public function renderSideBar($num)
-  {
-    for ($i = $this->obj->getLastId(); $i > $this->obj->getLastId() - $num; $i-- )
-    {
-      echo '<li><a href=index.php'.'?id='.$i.'>';
-      echo $this->renderTitle($i);
-      echo '</a></li>';
-    }
-  }
-
-  public function createObjects($num)
-  {
-    $this->objects = null;
-    $ids = $this->obj->getIds();
-    if ( !empty($ids) );
-    {
-      for ( $i = $this->obj->getLastId(); $i > count($ids) - $num; $i-- )
-      {
-        if($this->obj->isData($i) != false)
-        {
-          $this->objects[$i] = $this->obj->createData($i);
-        }
-      }
-    }
-  }
-
-  public function setObjectsNum($num)
-  {
-    $this->objectsnum = 0;
-    $ids = $this->obj->getIds();
-    if ( empty($ids) )
-    {
-      $this->message['nodata'] = 'NO DATA';
-      $this->objectsnum = 0;
-    }
-    elseif ( $num > count($ids) )
-    {
-      $this->objectsnum = count($ids);
-    }
-    else
-    {
-      $this->objectsnum = $num;
-    }
-  }
-
-  public function renderObjects()
+  /*
+   * objectpageに一覧を表示
+   */
+  public function renderObjects($objects)
   {
     if ( $this->objects != null )
     {
@@ -293,16 +282,16 @@ class Action
           echo '<tr>';
           echo '<td colspan="2">';
           echo '<p>';
-          echo str_replace(array("\r\n","\r","\n"),'<br />',$this->objects[$key]->getBody());
+          echo $this->renderBody($this->objects[$key]->getBody());
           echo '</p>';
           echo '</td>';
           echo '</tr>';
-          echo '<tr>';
-          echo '<td class="delete" colspan="2">';
-          echo '<input type="hidden" value="' . $key . '" name="delete" />';
-          echo '<input type="submit" value="削除" />';
-          echo '</td>';
-          echo '</tr>';
+          //echo '<tr>';
+          //echo '<td class="delete" colspan="2">';
+          //echo '<input type="hidden" value="' . $key . '" name="delete" />';
+          //echo '<input type="submit" value="削除" />';
+          //echo '</td>';
+          //echo '</tr>';
           echo '</table>';
           echo '</form>';
       }
@@ -323,10 +312,12 @@ class Action
   {
     if( isset($this->message) )
     {
+      //エラーとして出力したいものを配列に入れる
       $error = array(
         'title',
         'body',
         'delete',
+        'id',
       );
       echo '<tr>';
       echo '<td class="error" colspan=2>';
@@ -344,22 +335,34 @@ class Action
 
   public function delete($id)
   {
-    $title = $this->obj->getTitleById($id);
+    if ( $this->isObject($id) == true )
+    {
+      $object = $this->object;
+    }
+    //$title = $this->obj->getTitleById($id);
+    $title = $object->getTitle();
     $this->obj->delete($id);
     $this->deleteid = null;
     $this->message['delete'] = '[ ' . $title . ']を削除しました。';
   }
 
-  public function searchObject($id)
+  /* 現在オブジェクトが生成されているかどうか
+   * 生成されていればobject変数に該当するobjectを代入し、
+   * trueを返す。いなければfalseを返す
+   * ポインタみたいなものとして利用する想定
+   */
+  public function isObject($id)
   {
-    $this->objects;
     foreach ( $this->objects as $key => $value )
     {
       if ($this->objects[$key]->getId() == $id )
       {
-        return $this->objects[$key];
+        $this->object = $this->objects[$key];
+        return true;
       }
     }
+
+    return false;
   }
 
 }

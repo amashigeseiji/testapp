@@ -1,10 +1,13 @@
 <?php
 class Data
 {
-  private $id;
-  private $title;
-  private $body;
-  private $delkey = false;
+  private
+   $id,
+   $title,
+   $body,
+   $created_at,
+   $user,
+   $delkey = false;
 
   public function getId()
   {
@@ -34,5 +37,25 @@ class Data
   public function setBody($body)
   {
     $this->body = $body;
+  }
+
+  public function getCreatedAt()
+  {
+    return $this->created_at;
+  }
+
+  public function setCreatedAt($created_at)
+  {
+    $this->created_at = $created_at;
+  }
+
+  public function getUser()
+  {
+    return $this->user;
+  }
+
+  public function setUser($user)
+  {
+    $this->user = $user;
   }
 }

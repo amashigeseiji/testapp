@@ -6,7 +6,7 @@ class BaseData
   public $defaultpath = 'data/data.txt';
   public $errormessage = array();
   private $errorlog = 'data/errolog';
-//  public $lastid = '';
+  private $allobjects;
 
   public function initialize()
   {
@@ -19,8 +19,15 @@ class BaseData
      $this->setPath($this->defaultpath);
     }
 
+    $this->setBaseData();
+    //var_dump($this->basedata); exit;
+  }
+
+  public function setBaseData()
+  {
     if ( file_exists($this->path) )
     {
+      $basedata = array();
       //filepermissionの確認.775に設定する
       if (substr(sprintf('%o',fileperms($this->path)),-4) != 0775)
       {
@@ -32,10 +39,16 @@ class BaseData
 
       for ($i = 0; $i <= count($lines) -1; $i++)
       {
-        $this->basedata[$i] = explode(",", $lines[$i]);
+        $basedata[$i] = explode(",", $lines[$i]);
       }
+      $this->basedata = $basedata;
     }
-    //var_dump($this->basedata); exit;
+    else
+    {
+      $this->errormessage = array();
+      $this->errormessage[] .= '[' . __method__ . '] file:' . $file . " not exist.";
+      $this->errorLog();
+    }
   }
 
   public function setPath($file)
@@ -66,6 +79,8 @@ class BaseData
     if ( !empty($this->basedata) )
     {
       //TODO もっと綺麗に書けるはず…
+      //初回書き込み時にはこの条件に合致するので必須
+      //(タイトルの書き込みがあってから本文を書き込むので)
       if ( count($this->basedata) == 1 )
       {
         $ids[0] = $this->basedata[0][0];
@@ -93,9 +108,9 @@ class BaseData
   {
     //データがあれば true, なければ falseを返す
     $ids = $this->getIds();
-    for($i = 0; $i < count($ids); $i++)
+    foreach ( $ids as $key => $value )
     {
-      if ($ids[$i] == $id)
+      if ( $ids[$key] == $id )
       {
         return true;
       }
@@ -160,6 +175,21 @@ class BaseData
     }
   }
 
+  public function getCreatedAtById($id)
+  {
+    $created_at = '';
+    $basedata = $this->basedata;
+    for ($i = 0; $i < count($basedata); $i++)
+    {
+      if ( $basedata[$i][0] == $id && $basedata[$i][1] == 'created_at')
+      {
+        return $created_at = $basedata[$i][2];
+      }
+    }
+
+    return null;
+  }
+
   //title データが body より先にくる想定
   public function writeTitle($input)
   {
@@ -198,10 +228,10 @@ class BaseData
     $this->initialize();
   }
 
-  public function writeDate()
+  public function writeCreatedAt()
   {
     $fp = fopen($this->path, "a");
-    fwrite($fp, $this->getLastId() . ',' . 'date,' . date("Y-m-d H:i:s") . "\n");
+    fwrite($fp, $this->getLastId() . ',' . 'created_at,' . date("Y-m-d H:i:s") . "\n");
     fclose($fp);
   }
 
@@ -217,7 +247,7 @@ class BaseData
        fwrite($fp,$deleted[$key]);
      }
      fclose($fp);
-
+    //データの更新
      $this->initialize();
     }
     else
@@ -248,9 +278,22 @@ class BaseData
       $obj->setId($id);
       $obj->setTitle($this->getTitleById($id));
       $obj->setBody($this->getBodyById($id));
+      $obj->setCreatedAt($this->getCreatedAtById($id));
 
       return $obj;
     }
+  }
+
+  public function createAllData()
+  {
+    $objects = array();
+    $ids = $this->getIds();
+    foreach ( $ids as $key => $value)
+    {
+      $objects[$key] = $this->createData($value);
+    }
+
+    return $objects;
   }
 
   public function errorLog()
