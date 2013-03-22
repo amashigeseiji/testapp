@@ -35,9 +35,9 @@ class Action
     );
     $this->pageid = '';
 
+
     $this->createInstance();
 
-    $this->setObjects($this->objectsnum);
     $this->setSubmited();
     //データの書き込み処理
     if ( null != $this->submited['delete'] )
@@ -61,6 +61,7 @@ class Action
     include_once('BaseData.class.php');
     $this->obj = new BaseData;
     $this->obj->initialize();
+    $this->setObjects($this->objectsnum);
   }
 
   /* setObjectNumで0を渡した場合、
@@ -71,8 +72,9 @@ class Action
   private function setObjects($num)
   {
     $this->objects = null;
-    $this->setObjectsNum($num);
-    $this->createObjects($this->objectsnum);
+    $this->obj->setObjectsNum($num);
+    $this->obj->createObjects($this->objectsnum);
+    $this->objects = $this->obj->getObjects();
   }
 
   private function createObjects($num)
@@ -85,6 +87,7 @@ class Action
     {
       $num = count($ids);
     }
+    //TODO 計算条件ほんとにあってるのか?確認する(lastidで初期化していいのか?)
     //$numが0以外であれば$num件出力
     //setObjectNumでidsの検査はしているので
     //データが無い旨のメッセージ出力は不要だが
