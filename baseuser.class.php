@@ -1,39 +1,96 @@
 <?php
 class BaseUser
 {
-  private $users;
-  private $path = 'data/user.txt';
+  private
+    $baseusers,
+    $path = 'data/user.txt';
 
-  public function setUsers()
+  public
+    $authusers = array(),
+      $message = array(
+        'auth' => '',
+      );
+
+
+  function __construct()
   {
-    $users = array();
-    $lines = file("$this->path");
+    $this->setBaseUsers();
+  }
+
+  public function setBaseUsers()
+  {
+    $baseusers = array();
+    $lines = file($this->path);
     foreach ( $lines as $key => $value )
     {
-      $users[$key] = explode(",",$lines[$key]);
+      $baseusers[$key] = explode(",",$lines[$key]);
     }
-    $this->users = $users;
+    $this->baseusers = $baseusers;
   }
 
   public function getUserById($id)
   {
-    foreach ( $this->users as $key => $value )
+    foreach ( $this->baseusers as $key => $value )
     {
-      if ( $this->users[$key][0] == $id )
+      if ( $this->baseusers[$key][0] == $id )
       {
-        return $this->users[$key];
+        return $this->baseusers[$key];
       }
     }
 
     return null;
   }
 
-  public function getUserName()
+  public function isUser($id)
   {
+    foreach ( $this->baseusers as $key => $value )
+    {
+      if ( $this->baseusers[$key][0] == $id )
+      {
+        return true;
+      }
+    }
+
+    return false;
   }
 
-  public function getPassword()
+  public function getUserNameById($id)
   {
+    foreach ( $this->baseusers as $key => $value )
+    {
+      if ( $this->baseusers[$key][0] == $id )
+      {
+        return $this->baseusers[$key][1];
+      }
+    }
+
+    return null;
+  }
+
+  public function getUserIdByName($name)
+  {
+    foreach ( $this->baseusers as $key => $value )
+    {
+      if ( $this->baseusers[$key][1] == $name )
+      {
+        return $this->baseusers[$key][0];
+      }
+    }
+
+    return null;
+  }
+
+  public function getPasswordById($id)
+  {
+    foreach ( $this->baseusers as $key => $value )
+    {
+      if ( $this->baseusers[$key][0] == $id )
+      {
+        return $this->baseusers[$key][2];
+      }
+    }
+
+    return null;
   }
 
   public function getNumberOfUsers()
@@ -42,24 +99,33 @@ class BaseUser
 
   public function Authentication($name,$password)
   {
-    if ( $this->getUserName() == $name )
+    if ( $id = $this->getUserIdByName($name) );
     {
-      if ( $this->getPassword() == $password )
+      if ( $this->getPasswordById($id) == $password )
       {
+        $this->authusers[$id] = $this->createUser($id);
         return true;
       }
 
+      $this->message['auth'] = 'パスワードが違います。';
       return false;
     }
 
+    $this->message['auth'] = 'ユーザーが存在しません.';
     return false;
   }
 
-  public function createUser()
+  public function createUser($id)
   {
+    if ( $this->isUser($id) == true )
+    {
+      include_once('user.class.php');
+      $user = new User;
+      $user->setUserId($id);
+      $user->setName($this->getUserNameById($id));
+
+      return $user;
+    }
   }
 
 }
-$a = new BaseUser;
-$a->setUsers();
-var_dump($a->getUserById(3));
