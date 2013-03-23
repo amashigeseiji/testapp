@@ -8,12 +8,13 @@ class BaseData
     $defaultpath = 'data/data.txt',
     $errormessage = array(),
     $errorlog = 'data/errolog',
-    $objects,
     $objectsnum = 0,
     $message = array(
       'nodata'=>'NO DATA',
       'deleted'=>'',
       'write'=>'');
+  public
+    $objects;
 
 
   public function __construct()

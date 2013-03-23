@@ -7,8 +7,6 @@ class Action
     $defaulttitle = 'testpage',
     $template = 'template/template.php',
     $object,
-    $objects,
-    $objectsnum,
     $submited,
     $pageid;
 
@@ -26,15 +24,12 @@ class Action
     $this->obj = null;
     $this->pagetitle = '';
     $this->object = null;
-    $this->objects = null;
-    $this->objectsnum = 0;
     $this->submited = array(
       'title'   => '',
       'body'    => '',
       'delete'  => '',
     );
     $this->pageid = '';
-
 
     $this->createInstance();
 
@@ -43,12 +38,10 @@ class Action
     if ( null != $this->submited['delete'] )
     {
       $this->delete($this->getId());
-      //$this->setObjects($this->objectsnum);
     }
     if ( null != $this->submited['title'] && null != $this->submited['body'] )
     {
       $this->obj->writeData($this->submited);
-      //$this->setObjects($this->objectsnum);
     }
 
     $this->setPageId();
@@ -60,84 +53,10 @@ class Action
   {
     include_once('BaseData.class.php');
     $this->obj = new BaseData;
-    $this->obj->initialize();
-    $this->setObjects($this->objectsnum);
-  }
-
-  /* setObjectNumで0を渡した場合、
-   * 必ず$this->objectnumには0が設定される
-   * createObjectsにも0が渡されるので
-   * 全件出力になる
-   */
-  private function setObjects($num)
-  {
-    $this->objects = null;
-    $this->obj->setObjectsNum($this->objectsnum);
-    $this->obj->createObjects($this->objectsnum);
-    $this->objects = $this->obj->getObjects();
-  }
-
-  private function createObjects($num)
-  {
-    $this->objects = null;
-    $ids = $this->obj->getIds();
-    //$numに0が入っていれば全件出力
-    //次のfor文でのforの終了条件を0にする
-    if ( $num == 0 )
-    {
-      $num = count($ids);
-    }
-    //TODO 計算条件ほんとにあってるのか?確認する(lastidで初期化していいのか?)
-    //$numが0以外であれば$num件出力
-    //setObjectNumでidsの検査はしているので
-    //データが無い旨のメッセージ出力は不要だが
-    //データがなくてもエラーとは言えないためidsが空でここにくることはある
-    //
-    if ( !empty($ids) );
-    {
-      for ( $i = $this->obj->getLastId(); $i > count($ids) - $num; $i-- )
-      {
-        if($this->obj->isData($i) != false)
-        {
-          $this->objects[$i] = $this->obj->createData($i);
-        }
-        else
-        {
-          $num + 1;
-        }
-      }
-    }
-  }
-
-  /*
-   * $numに0を渡した場合、
-   * 配列要素($ids = データ)があるなら必ず最終条件にくるので、
-   * 0が渡されたらかならず0を返す
-   * setObjectNum()に0以外の値を渡し、かつ配列要素が存在するときのみ、
-   * $objectnumに値が代入される
-   */
-  public function setObjectsNum($num)
-  {
-    $this->objectsnum = 0;
-    $ids = $this->obj->getIds();
-    if ( empty($ids) )
-    {
-      $this->message['nodata'] = 'NO DATA';
-      $this->objectsnum = 0;
-    }
-    elseif ( $num > count($ids) )
-    {
-      $this->objectsnum = count($ids);
-    }
-    else
-    {
-      $this->objectsnum = $num;
-    }
   }
 
   public function getId()
   {
-    //getの処理が甘いみたいなので修正する
     if (array_key_exists("id",$_GET))
     {
       if ( $this->obj->isData($_GET['id']))
@@ -249,9 +168,9 @@ class Action
    */
   public function renderObjects($n)
   {
-    if ( $this->objects != null )
+    if ( $this->obj->objects != null )
     {
-      for ( $i = $this->obj->getLastId(); $i > count($this->objects) - $n; $i-- )
+      for ( $i = $this->obj->getLastId(); $i > count($this->obj->objects) - $n; $i-- )
       {
         if ( $this->isObject($i) )
         {
@@ -348,11 +267,11 @@ class Action
    */
   public function isObject($id)
   {
-    foreach ( $this->objects as $key => $value )
+    foreach ( $this->obj->objects as $key => $value )
     {
-      if ($this->objects[$key]->getId() == $id )
+      if ($this->obj->objects[$key]->getId() == $id )
       {
-        $this->object = $this->objects[$key];
+        $this->object = $this->obj->objects[$key];
         return true;
       }
     }
