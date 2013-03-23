@@ -417,7 +417,7 @@ class BaseData
 
   public function createData($id)
   {
-    if($this->isData($id) == true)
+    if( $this->isData($id) == true )
     {
       include_once('Data.class.php');
       $obj = new Data;

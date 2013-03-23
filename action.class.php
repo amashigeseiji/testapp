@@ -207,10 +207,6 @@ class Action
           echo '</table>';
           //echo '</form>';
         }
-        else
-        {
-          $n + 1;
-        }
       }
     }
     else
