@@ -43,12 +43,12 @@ class Action
     if ( null != $this->submited['delete'] )
     {
       $this->delete($this->getId());
-      $this->setObjects($this->objectsnum);
+      //$this->setObjects($this->objectsnum);
     }
     if ( null != $this->submited['title'] && null != $this->submited['body'] )
     {
-      $this->writeData($this->submited);
-      $this->setObjects($this->objectsnum);
+      $this->obj->writeData($this->submited);
+      //$this->setObjects($this->objectsnum);
     }
 
     $this->setPageId();
@@ -72,7 +72,7 @@ class Action
   private function setObjects($num)
   {
     $this->objects = null;
-    $this->obj->setObjectsNum($num);
+    $this->obj->setObjectsNum($this->objectsnum);
     $this->obj->createObjects($this->objectsnum);
     $this->objects = $this->obj->getObjects();
   }
@@ -195,21 +195,6 @@ class Action
   public function renderBody($text)
   {
     return str_replace(array("\r\n","\r","\n"),'<br />',$this->escape($text));
-  }
-
-  public function writeData($input)
-  {
-    if ( $this->obj->writeTitle($input["title"]) == true )
-    {
-      $this->obj->writeBody($input["body"]);
-      $this->obj->writeCreatedAt();
-    }
-    else
-    {
-      $this->obj->errormessage = array();
-      $this->obj->errormessage[] .= '[' . __method__ . '] write failed.';
-      $this->obj->errorLog();
-    }
   }
 
   public function setPageTitle()

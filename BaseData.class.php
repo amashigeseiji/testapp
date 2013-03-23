@@ -3,23 +3,29 @@ class BaseData
 {
   private
     $basedata = array(),
+    $linecount,
     $path,
     $defaultpath = 'data/data.txt',
     $errormessage = array(),
     $errorlog = 'data/errolog',
     $objects,
-    $objectsnum,
+    $objectsnum = 0,
     $message = array(
       'nodata'=>'NO DATA',
       'deleted'=>'',
       'write'=>'');
 
 
+  public function __construct()
+  {
+    $this->initialize();
+  }
 
   public function initialize()
   {
+    $this->objects = null;
+    $this->objectsnum = 0;
     $this->errormessage = array();
-
     $this->path = $this->defaultpath;
     //if (null == $this->path)
     //{
@@ -27,20 +33,27 @@ class BaseData
     //}
 
     $this->load();
+    $this->setObjectsNum($this->objectsnum);
+    $this->createObjects($this->objectsnum);
     //var_dump($this->basedata); exit;
   }
 
   public function load()
   {
-    $this->basedata = array();
     $lines = array();
+    $this->linecount = 0;
+    $this->basedata = array();
+
     $lines = file($this->path);
+    $this->linecount = count($lines);
 
     for ($i = 0; $i <= count($lines) -1; $i++)
     {
       $this->basedata[$i] = explode(",", $lines[$i]);
     }
+
     //var_dump($this->basedata);exit;
+    //echo count($this->basedata);exit;
   }
 
   public function setPath($file)
@@ -90,32 +103,53 @@ class BaseData
   public function getIds()
   {
     $ids = array();
-    if ( !empty($this->basedata) )
+
+    if ( $this->linecount != 0 )
     {
-      //TODO もっと綺麗に書けるはず…
+      //依存関係上このオブジェクトの正常性を保証するのがこのメソッド
       //初回書き込み時にはこの条件に合致するので必須
-      //(タイトルの書き込みがあってから本文を書き込むので)
-      if ( count($this->basedata) == 1 )
+      if ( $this->linecount == 1 )
       {
         $ids[0] = $this->basedata[0][0];
 
         return $ids;
       }
 
-      if ( $this->basedata[0][0] == $this->basedata[1][0])
+      if ( $this->linecount >= 2 )
       {
-        $ids[0] = $this->basedata[0][0];
-      }
-      for ( $i = 1; $i <= count($this->basedata) -1; $i++)
-      {
-        if ( $this->basedata[$i][0] != null && $this->basedata[$i][0] != $this->basedata[$i-1][0] )
+        if ( $this->basedata[0][0] == $this->basedata[1][0])
         {
-          $ids[] .= $this->basedata[$i][0];
+          $ids[0] = $this->basedata[0][0];
+        }
+        else
+        {
+          //不正データが存在する
+          $this->errormessage = array();
+          $this->errormessage[] .= '[' . __method__ . '] data has null id.';
+          $this->errorLog();
+        }
+
+        for ( $i = 1; $i <= $this->linecount -1; $i++)
+        {
+          if ( $this->basedata[$i][0] != $this->basedata[$i-1][0] )
+          {
+            if ( isset($this->basedata[$i][0]) )
+            {
+              $ids[] .= $this->basedata[$i][0];
+            }
+            else
+            {
+              //不正データが存在する
+              $this->errormessage = array();
+              $this->errormessage[] .= '[' . __method__ . '] data has null id.';
+              $this->errorLog();
+            }
+          }
         }
       }
-    }
 
-    return $ids;
+      return $ids;
+    }
   }
 
   public function isData($id)
@@ -204,17 +238,27 @@ class BaseData
 
   public function writeData($input)
   {
-    if ( $this->writeTitle($input["title"]) == true )
+    $this->message['write'] = '';
+
+    if ( $this->writeTitle($input) == true )
     {
-      $this->writeBody($input["body"]);
-      $this->writeCreatedAt();
-      $this->message['write'] = 'SUCCESS';
+      if ( $this->writeBody($input) == true )
+      {
+        $this->writeCreatedAt();
+        $this->initialize();
+
+        return $this->message['write'] = 'SUCCESS';
+      }
+      else
+      {
+
+        return $this->message['write'] = 'FAIL';
+      }
     }
     else
     {
-      $this->errormessage = array();
-      $this->errormessage[] .= '[' . __method__ . '] write failed.';
-      $this->errorLog();
+
+      return $this->message['write'] = 'FAIL';
     }
   }
 
@@ -225,12 +269,28 @@ class BaseData
     $lastid = $this->getLastId();
     if ((file_exists($this->path)) && ($fp = fopen($this->path, "a")))
     {
-      fwrite($fp, $lastid + 1 . ',' . 'title,' . $input . "\n");
-      fclose($fp);
-      //データの更新
-      $this->initialize();
+      if ( array_key_exists('title',$input) && isset($input['title']) )
+      {
+        fwrite($fp, $lastid + 1 . ',' . 'title,' . $input['title'] . "\n");
+        fclose($fp);
+        //データの更新
+        $this->initialize();
+      }
 
-      return true;
+      if ( $this->isData($this->getLastId()) && $this->getTitleById($this->getLastId()) == $input['title'] . "\n" )
+      {
+
+        return true;
+      }
+      else
+      {
+        //不正データが存在する
+        $this->errormessage = array();
+        $this->errormessage[] .= '[' . __method__ . '] titledata write faild.';
+        $this->errorLog();
+
+        return false;
+      }
     }
     else
     {
@@ -245,15 +305,28 @@ class BaseData
   //title のデータが存在することを前提にする(titleよりもbodyをさきに書き込むとid順がくずれる)
   public function writeBody($input)
   {
-    $fp = fopen($this->path, "a");
-    $tmp = explode("\n",$input);
-    for( $i = 0; $i <= count($tmp) -1; $i++)
+    if ( array_key_exists('body',$input) && isset($input['body']) )
     {
-      fwrite($fp, $this->getLastId() . ',' . 'body,' . $tmp[$i] . "\n");
+      $fp = fopen($this->path, "a");
+      $tmp = explode("\n",$input['body']);
+      for( $i = 0; $i <= count($tmp) -1; $i++)
+      {
+        fwrite($fp, $this->getLastId() . ',' . 'body,' . $tmp[$i] . "\n");
+      }
+      fclose($fp);
+      //データの更新
+      $this->initialize();
+
+      return true;
     }
-    fclose($fp);
-    //データの更新
-    $this->initialize();
+    else
+    {
+      $this->errormessage = array();
+      $this->errormessage[] .= '[' . __method__ . '] bodydata write faild.';
+      $this->errorLog();
+
+      return false;
+    }
   }
 
   public function writeCreatedAt()
@@ -294,6 +367,7 @@ class BaseData
     $this->editBody();
     //処理を記述
   }
+
   public function editTitle($id,$input)
   {
     //処理を記述
@@ -404,8 +478,8 @@ class BaseData
    * $numに0を渡した場合、
    * 配列要素($ids = データ)があるなら必ず最終条件にくるので、
    * 0が渡されたらかならず0を返す
-   * setObjectNum()に0以外の値を渡し、かつ配列要素が存在するときのみ、
-   * $objectnumに値が代入される
+   * setObjectsNum()に0以外の値を渡し、かつ配列要素が存在するときのみ、
+   * $objectsnumに値が代入される
    */
   public function setObjectsNum($num)
   {
@@ -436,6 +510,16 @@ class BaseData
     return $this->message;
   }
 
+  public function setMessage($message)
+  {
+    $this->message = array(
+      'nodata'    =>  '',
+      'deleted'   =>  '',
+      'write'     =>  '',
+      );
+
+  }
+
   public function errorLog()
   {
     if ( isset($this->errormessage) )
@@ -455,3 +539,14 @@ class BaseData
 //$a->initialize();
 //$input['body'] = "置換したよ!!\ntest";
 //$a->editBody(35,$input);
+
+//var_dump($a->getIds());
+//$input = array('title'=>'てっすと','body'=>'bodyふぁお');
+//var_dump($a->writeData($input));
+//var_dump($a->isData($a->getLastId()));
+//var_dump($a->getTitleById($a->getLastId()));
+//if ($a->isData($a->getLastId()))
+//{
+//  if ($a->getTitleById($a->getLastId()) == $input['title'])
+//  {echo 'tetete';}
+//}
