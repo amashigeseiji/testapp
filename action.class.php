@@ -168,12 +168,15 @@ class Action
    */
   public function renderObjects($n)
   {
+    $counter = 0;
     if ( $this->obj->objects != null )
     {
-      for ( $i = $this->obj->getLastId(); $i > count($this->obj->objects) - $n; $i-- )
+      foreach ( $this->obj->objects as $key => $val)
       {
-        if ( $this->isObject($i) )
+        if ( $counter == $n ){ exit; }
+        if ( $this->isObject($key) )
         {
+          $counter += 1;
           //echo '<form action="#" method="post">';
           echo '<table class="objects">';
           echo '<tr class="title">';
