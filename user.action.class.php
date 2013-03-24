@@ -5,23 +5,36 @@ class UserAction extends Action
   public
     $authusers = array();
   public
-    $baseusers;
+    $baseusers,
+    $logout = 0;
+
 
   function __construct()
   {
-    session_start();
-    include_once('baseuser.class.php');
-        var_dump($this->authusers);
-  var_dump($_SESSION);
-    $this->baseusers = new BaseUser;
-    if ( isset($_SESSION['id']) )
+    $this->initialize();
+  }
+
+  public function initialize()
+  {
+    if ( array_key_exists('logout',$_GET) && $_GET['logout'] == 1 )
     {
-      $this->authusers[] .= $_SESSION['id'];
-      $action = new Action;
+      $this->logout();
     }
     else
     {
-      $this->callTemplate('template/auth.php');
+      session_start();
+      include_once('baseuser.class.php');
+      $this->baseusers = new BaseUser;
+      var_dump($_SESSION);
+      if ( isset($_SESSION['id']) )
+      {
+        $this->authusers[] .= $_SESSION['id'];
+        $action = new Action;
+      }
+      else
+      {
+        $this->callTemplate('template/auth.php');
+      }
     }
   }
 
@@ -33,7 +46,7 @@ class UserAction extends Action
       {
         $_SESSION['id'] = $this->baseusers->getUserIdByName($_POST['name']);
         $this->authusers[] .= $this->baseusers->getUserIdByName($_POST['name']);
-        $action = new Action;
+        $this->initialize();
       }
       else
       {
@@ -62,30 +75,17 @@ class UserAction extends Action
   public function logout()
   {
     $_SESSION = array();
-
     if (isset($_COOKIE["PHPSESSID"]))
     {
-        setcookie("PHPSESSID", '', time() - 1800, '/');
+      setcookie("PHPSESSID", '', time() - 1800, '/');
     }
 
-var_dump($_SESSION);
-    session_destroy();
+    //var_dump($_SESSION);
+    //session_destroy();
+    header("Location: http://test2.local");
   }
 }
-if ($_GET['logout'] == 1)
-{
-    $_SESSION = array();
 
-    if (isset($_COOKIE["PHPSESSID"]))
-    {
-        setcookie("PHPSESSID", '', time() - 1800, '/');
-    }
-
-var_dump($_SESSION);
-    session_destroy();
-  var_dump($_SESSION);
-  var_dump($_COOKIE);
-}
 
 $auth = new UserAction;
 if ( isset($_POST['name']) && isset($_POST['password']) )
