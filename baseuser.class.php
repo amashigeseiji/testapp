@@ -7,7 +7,7 @@ class BaseUser
 
   public
     $authusers = array(),
-      $message = array(
+    $message   = array(
         'auth' => '',
       );
 
@@ -99,6 +99,17 @@ class BaseUser
 
   public function Authentication($name,$password)
   {
+    if ( empty($name) )
+    {
+      $this->message['auth'] = '名前を入力してください。';
+      return false;
+    }
+    if ( empty($password) )
+    {
+      $this->message['auth'] = 'パスワードを入力してください。';
+      return false;
+    }
+
     if ( $id = $this->getUserIdByName($name) );
     {
       if ( $this->getPasswordById($id) == $password )
