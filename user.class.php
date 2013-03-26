@@ -22,7 +22,7 @@ class User extends BaseUser
     $this->name = $this->getUserNameById($id);
   }
 
-  public function getName($name)
+  public function getName()
   {
     return $this->name;
   }

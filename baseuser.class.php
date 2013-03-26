@@ -2,22 +2,17 @@
 class BaseUser
 {
   private
-    $baseusers,
     $path = 'data/user.txt';
 
   public
     $authusers = array(),
     $message   = array(
         'auth' => '',
-      );
+      ),
+    $user;
 
 
-  function __construct()
-  {
-    $this->setBaseUsers();
-  }
-
-  public function setBaseUsers()
+  public function getBaseUsers()
   {
     $baseusers = array();
     $lines = file($this->path);
@@ -25,21 +20,17 @@ class BaseUser
     {
       $baseusers[$key] = explode(",",$lines[$key]);
     }
-    $this->baseusers = $baseusers;
-  }
-
-  public function getBaseUsers()
-  {
-    return $this->baseusers;
+    return $baseusers;
   }
 
   public function getUserById($id)
   {
-    foreach ( $this->baseusers as $key => $value )
+    $baseusers = $this->getBaseUsers();
+    foreach ( $baseusers as $key => $value )
     {
-      if ( $this->baseusers[$key][0] == $id )
+      if ( $baseusers[$key][0] == $id )
       {
-        return $this->baseusers[$key];
+        return $baseusers[$key];
       }
     }
 
@@ -48,9 +39,10 @@ class BaseUser
 
   public function isUser($id)
   {
-    foreach ( $this->baseusers as $key => $value )
+    $baseusers = $this->getBaseUsers();
+    foreach ( $baseusers as $key => $value )
     {
-      if ( $this->baseusers[$key][0] == $id )
+      if ( $baseusers[$key][0] == $id )
       {
         return true;
       }
@@ -61,11 +53,12 @@ class BaseUser
 
   public function getUserNameById($id)
   {
-    foreach ( $this->baseusers as $key => $value )
+    $baseusers = $this->getBaseUsers();
+    foreach ( $baseusers as $key => $value )
     {
-      if ( $this->baseusers[$key][0] == $id )
+      if ( $baseusers[$key][0] == $id )
       {
-        return $this->baseusers[$key][1];
+        return $baseusers[$key][1];
       }
     }
 
@@ -74,11 +67,12 @@ class BaseUser
 
   public function getUserIdByName($name)
   {
-    foreach ( $this->baseusers as $key => $value )
+    $baseusers = $this->getBaseUsers();
+    foreach ( $baseusers as $key => $value )
     {
-      if ( $this->baseusers[$key][1] == $name )
+      if ( $baseusers[$key][1] == $name )
       {
-        return $this->baseusers[$key][0];
+        return $baseusers[$key][0];
       }
     }
 
@@ -87,11 +81,12 @@ class BaseUser
 
   public function getPasswordById($id)
   {
-    foreach ( $this->baseusers as $key => $value )
+    $baseusers = $this->getBaseUsers();
+    foreach ( $baseusers as $key => $value )
     {
-      if ( $this->baseusers[$key][0] == $id )
+      if ( $baseusers[$key][0] == $id )
       {
-        return $this->baseusers[$key][2];
+        return $baseusers[$key][2];
       }
     }
 
@@ -102,35 +97,6 @@ class BaseUser
   {
   }
 
-  public function Authentication($name,$password)
-  {
-    if ( empty($name) )
-    {
-      $this->message['auth'] = '名前を入力してください。';
-      return false;
-    }
-    if ( empty($password) )
-    {
-      $this->message['auth'] = 'パスワードを入力してください。';
-      return false;
-    }
-
-    if ( $id = $this->getUserIdByName($name) );
-    {
-      if ( $this->getPasswordById($id) == $password )
-      {
-        $this->authusers[$id] = $this->createUser($id);
-        return true;
-      }
-
-      $this->message['auth'] = 'パスワードが違います。';
-      return false;
-    }
-
-    $this->message['auth'] = 'ユーザーが存在しません.';
-    return false;
-  }
-
   public function createUser($id)
   {
     if ( $this->isUser($id) == true )
@@ -138,9 +104,10 @@ class BaseUser
       include_once('user.class.php');
       $user = new User;
       $user->setUserId($id);
-      $user->setName($this->getUserNameById($id));
+      $user->setName($id);
+      $user->setToken();
 
-      return $user;
+      return $this->user = $user;
     }
   }
 
