@@ -28,6 +28,11 @@ class BaseUser
     $this->baseusers = $baseusers;
   }
 
+  public function getBaseUsers()
+  {
+    return $this->baseusers;
+  }
+
   public function getUserById($id)
   {
     foreach ( $this->baseusers as $key => $value )
