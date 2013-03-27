@@ -107,7 +107,7 @@ class BaseUser
       $user->setName($id);
       $user->setToken();
 
-      return $this->user = $user;
+      return $user;
     }
   }
 

@@ -1,4 +1,3 @@
-<?php function plus(){$n = 10;$n + 10;} ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,6 +11,12 @@
     <div id="header">
     <a href="http://test2.local">test2.local</a>
     </div>
+
+<!--    <div id="logout">
+    <form action="#" method="post" >
+    <input type="submit" name="logout" value="logout" />
+</form>
+    </div>-->
 
     <div id="sidebar">
       <ul>

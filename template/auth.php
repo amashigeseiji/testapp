@@ -1,10 +1,12 @@
+<?php if(null == $this->user): ?>
 <!DOCTYPE>
 <html>
 <head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+  <link rel="stylesheet" type="text/css" href="template/main.css" />
+<title>login</title>
 </head>
 <body>
-
-<?php if(null == $this->user): ?>
   <form action="#" method="post">
 
     <table>
@@ -32,7 +34,7 @@
     <form action="#" method="post" >
       <input type="submit" name="logout" value="logout" />
     </form>
-    <a href="<?php $_SERVER['PHP_SELF'] ?>">test</a>
+    <?php $action = null; $action = new Action; ?>
 
 <?php endif; ?>
 </body>

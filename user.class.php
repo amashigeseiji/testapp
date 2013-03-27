@@ -5,8 +5,7 @@ class User extends BaseUser
     $userid = null,
     $name = null,
     //$password,
-    $token = null,
-    $is_authenticated = false;
+    $token = null;
 
   function __construct()
   {
@@ -44,6 +43,7 @@ class User extends BaseUser
         $fp = fopen("data/token/$token","w");
         fwrite($fp,$this->name);
         fclose($fp);
+        $this->token = $token;
       }
     }
   }
