@@ -351,7 +351,7 @@ class BaseData extends BaseUser
   public function writeCreatedAt()
   {
     $fp = fopen($this->path, "a");
-    fwrite($fp, $this->getLastId() . ',' . 'created_at,' . date("Y-m-d H:i:s") . "\n");
+    fwrite($fp, $this->getLastId() . ',' . 'created_at,' . strtotime("now") . "\n");
     fclose($fp);
     //データの更新
     $this->initialize();

@@ -9,15 +9,16 @@
 <body>
   <div id="container">
     <div id="header">
-    <a href="http://test2.local">test2.local</a>
+    <a href="http://test2.local/">test2.local</a>
     </div>
 
-
-<!--    <div id="logout">
-    <form action="#" method="post" >
-    <input type="submit" name="logout" value="logout" />
-</form>
-    </div>-->
+    <div id="logout">
+      <?php echo 'login : ' . $this->getLoginUserName() ?>
+      <!--<a href="index.php/?logout=<?php //echo $this->getCookie('token') ?>">logout</a>-->
+      <form action="#" method="post" >
+        <input type="submit" name="logout" value="logout" />
+      </form>
+    </div>
 
     <div id="sidebar">
       <ul>
@@ -41,21 +42,21 @@
         <form action="#" method="post">
           <table>
             <tr>
-              <td>
+              <td class="title">
                 <?php echo $this->escape($object->getTitle()) ?>
               </td>
-              <td class="date">
-                <?php echo $this->object->getCreatedAt() ?>
-              </td>
             </tr>
-            <tr>
+            <tr class="body">
               <td colspan="2">
+                <p>
                 <?php echo $this->renderBody($object->getBody()) ?>
+                </p>
               </td>
             </tr>
             <tr>
               <td colspan="2" class="posted_by">
                 posted_by : <?php echo $this->object->getPostedBy() ?>
+                <?php echo date("Y-m-d H:i",(int)$this->object->getCreatedAt()) ?>
               </td>
             </tr>
             <tr>

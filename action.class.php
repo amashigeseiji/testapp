@@ -61,15 +61,15 @@ class Action extends UserAction
 
   public function getId()
   {
-    if (array_key_exists("id",$_GET))
+    if ( null != ($id = $this->getGetValue('id')) )
     {
-      if ( $this->obj->isData($_GET['id']) )
+      if ( $this->obj->isData($id))
       {
-        return $_GET["id"];
+        return $id;
       }
       else
       {
-        $this->message['id'] = 'id' . $_GET["id"] . 'は存在しないデータです。';
+        $this->message['id'] = 'id' . $id . 'は存在しないデータです。';
         return null;
       }
     }
@@ -77,6 +77,12 @@ class Action extends UserAction
     {
       return null;
     }
+  }
+
+  public function getLoginUserName()
+  {
+    $token = $this->getCookie('token');
+    return $this->getNameByToken($token);
   }
 
   public function setSubmited()
@@ -182,12 +188,12 @@ class Action extends UserAction
           echo $this->object->getTitle();
           echo '</a>';
           echo '</td>';
-          echo '<td class="date">';
-          echo $this->object->getCreatedAt();
-          echo '</td>';
+          //echo '<td class="date">';
+          //echo $this->object->getCreatedAt();
+          //echo '</td>';
           echo '</tr>';
           echo '<tr>';
-          echo '<td colspan="3">';
+          echo '<td colspan="2">';
           echo '<p>';
           echo $this->renderBody($this->object->getBody());
           echo '</p>';
@@ -196,6 +202,7 @@ class Action extends UserAction
           echo '<tr>';
           echo '<td class="posted_by" colspan="3">';
           echo 'posted_by : '.$this->object->getPostedBy();
+          echo '&nbsp&nbsp'.date("Y/m/d H:i",(int)$this->object->getCreatedAt());
           echo '</td>';
           echo '</tr>';
           echo '</table>';

@@ -1,5 +1,5 @@
 <?php if(null == $this->user): ?>
-<!DOCTYPE>
+<!DOCTYPE html>
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
@@ -8,9 +8,6 @@
 </head>
 <body>
   <form action="#" method="post">
-  <?php //if ($message = $this->message['auth'] != null): ?>
-  <?php //echo $message ?>
-  <?php //endif; ?>
     <table>
       <tr>
         <th>name</th>
@@ -31,16 +28,16 @@
     </table>
   </form>
 
-  <?php else: ?>
+<!--  <?php //else: ?>
     <div id="logout">
-      <?php echo 'login:'.$this->user->getName() ?>
+      <?php //echo 'login:'.$this->user->getName() ?>
       <form action="#" method="post" >
         <input type="submit" name="logout" value="logout" />
       </form>
     </div>
 
     <?php //$action = null; $action = new Action; ?>
-
+-->
 <?php endif; ?>
 </body>
 </html>

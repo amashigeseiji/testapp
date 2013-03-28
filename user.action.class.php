@@ -6,10 +6,9 @@ class UserAction
     $authusers = array(),
     $user,
     $baseuserobj,
-    $logout = 0,
-    $tetete = null,
     $tokens = array(),
     $usernames = array(),
+    $cookie = null,
     $message = array();
 
 
@@ -27,6 +26,7 @@ class UserAction
     $this->usernames = array();
     $this->user = null;
     $post = null;
+    $this->cookie = null;
     $tokens = array();
 
     $this->baseuserobj = new BaseUser;
@@ -34,34 +34,38 @@ class UserAction
 
 
     $post = $this->getPostValue('logout');
-    $cookie = $this->getCookie('token');
+    //$logout = $this->getGetValue('logout');
+    $this->cookie = $this->getCookie('token');
 
     //cookie の破棄が先!!
     if ( null != $post )
     {
-      //ログアウト処理ではクッキーを削除
-      $this->deleteToken($cookie);
-      $this->user = null;
-      $cookie = $this->getCookie('token');
-      //ログインページを表示する
-      $this->callTemplate('template/auth.php');
-      $action = null;
+      $this->logout($this->cookie);
     }
 
+    $this->login($this->cookie);
+  }
+
+  public function login($cookie)
+  {
     if ( null != $cookie )
     {
       //cookieがtokenと一致すれば自動ログイン
       $name = $this->getNameByToken($cookie);
       $id = $this->baseuserobj->getUserIdByName($name);
       $this->user = $this->createUser($id);
-      $this->callTemplate('template/auth.php');
       $action = new Action;
     }
     elseif ( $this->isWebRequest('name',$_POST) && $this->isWebRequest('password',$_POST) )
     {
       if ( true == $this->Authentication($_POST) )
       {
+        header("Location: $_SERVER[PHP_SELF]");
         $action = new Action;
+      }
+      else
+      {
+        $this->callTemplate('template/auth.php');
       }
     }
     else
@@ -69,7 +73,23 @@ class UserAction
       $this->user = null;
       $this->callTemplate('template/auth.php');
     }
+  }
 
+  public function logout($cookie)
+  {
+    //ログアウト処理ではクッキーを削除
+    $this->deleteToken($cookie);
+    $this->user = null;
+    $this->cookie = $this->getCookie('token');
+    //ログインページを表示する
+    //header("Location: $_SERVER[PHP_SELF]");
+    $this->callTemplate('template/auth.php');
+    $action = null;
+  }
+
+  public function getBaseUserObj()
+  {
+    return new BaseUser;
   }
 
   public function isWebRequest($parameter,$request)
@@ -136,13 +156,11 @@ class UserAction
       if ( $this->auth($post['name'],$post['password']) == true )
       {
         $this->user = $this->createUser($id);
-        $this->callTemplate('template/auth.php');
         return true;
       }
       else
       {
         echo $this->message['auth'];
-        $this->callTemplate('template/auth.php');
         return false;
       }
     }
@@ -181,9 +199,11 @@ class UserAction
   public function getNameByToken($token)
   {
     $dir = opendir('data/token');
+    $usernames = $this->getUserNames();
+
     while ( false != ($filename = readdir($dir)) )
     {
-      foreach ( $this->usernames as $name )
+      foreach ( $usernames as $name )
       {
         if ( $filename == $name )
         {
@@ -238,6 +258,17 @@ class UserAction
     }
   }
 
+  public function getUserNames()
+  {
+    $baseusers = $this->getBaseUserObj()->getBaseUsers();
+    $usernames = array();
+    foreach ( $baseusers as $key => $value )
+    {
+      $usernames[] .= $baseusers[$key][1];
+    }
+    return $usernames;
+  }
+
   public function setAuthUsers()
   {
     $filenames = glob("data/token/*");
@@ -259,18 +290,6 @@ class UserAction
 
   public function getAuthUsers()
   {
-  }
-
-  public function logout($token)
-  {
-    $_SESSION = array();
-    $this->deleteToken($token);
-    if ( isset($_COOKIE['token']) )
-    {
-      setcookie("token", '', time() - 1800, '/');
-    }
-
-    header("Location:".$_SERVER['PHP_SELF']);
   }
 
   public function callTemplate($file)
