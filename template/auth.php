@@ -32,11 +32,14 @@
   </form>
 
   <?php else: ?>
-  <?php echo 'login:'.$this->user->getName() ?>
-    <form action="#" method="post" >
-      <input type="submit" name="logout" value="logout" />
-    </form>
-    <?php $action = null; $action = new Action; ?>
+    <div id="logout">
+      <?php echo 'login:'.$this->user->getName() ?>
+      <form action="#" method="post" >
+        <input type="submit" name="logout" value="logout" />
+      </form>
+    </div>
+
+    <?php //$action = null; $action = new Action; ?>
 
 <?php endif; ?>
 </body>

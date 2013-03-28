@@ -65,6 +65,18 @@ class BaseUser
     return null;
   }
 
+  public function getUserNames()
+  {
+    $baseusers = $this->getBaseUsers();
+    $usernames = array();
+    foreach ( $baseusers as $key => $value )
+    {
+      $usernames[] .= $baseusers[$key][1];
+    }
+
+    return $usernames;
+  }
+
   public function getUserIdByName($name)
   {
     $baseusers = $this->getBaseUsers();
@@ -75,6 +87,29 @@ class BaseUser
         return $baseusers[$key][0];
       }
     }
+
+    return null;
+  }
+
+  public function getUserNameByToken($token)
+  {
+    $dir = opendir('data/token');
+    $usernames = $this->getUserNames();
+    while ( false != ($filename = readdir($dir)) )
+    {
+      foreach ( $usernames as $name )
+      {
+        if ( $filename == $name )
+        {
+          if ( file_get_contents("data/token/$filename") == $token )
+          {
+            closedir($dir);
+            return $name;
+          }
+        }
+      }
+    }
+    closedir($dir);
 
     return null;
   }
@@ -91,10 +126,6 @@ class BaseUser
     }
 
     return null;
-  }
-
-  public function getNumberOfUsers()
-  {
   }
 
   public function createUser($id)

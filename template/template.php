@@ -12,6 +12,7 @@
     <a href="http://test2.local">test2.local</a>
     </div>
 
+
 <!--    <div id="logout">
     <form action="#" method="post" >
     <input type="submit" name="logout" value="logout" />
@@ -25,9 +26,9 @@
     </div>
 
     <?php if($this->pageid == ''): ?>
-      <div id="write">
-        <?php $this->callTemplate('template/inputform.php'); ?>
-      </div>
+    <div id="write">
+      <?php $this->callTemplate('template/inputform.php'); ?>
+    </div>
 
       <div id="content">
         <?php $n = 10 ?>
@@ -43,10 +44,18 @@
               <td>
                 <?php echo $this->escape($object->getTitle()) ?>
               </td>
+              <td class="date">
+                <?php echo $this->object->getCreatedAt() ?>
+              </td>
             </tr>
             <tr>
-              <td>
+              <td colspan="2">
                 <?php echo $this->renderBody($object->getBody()) ?>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" class="posted_by">
+                posted_by : <?php echo $this->object->getPostedBy() ?>
               </td>
             </tr>
             <tr>

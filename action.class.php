@@ -1,14 +1,17 @@
 <?php
-class Action
+class Action extends UserAction
 {
+
   private
-    $message = array(),
-    $pagetitle,
     $defaulttitle = 'testpage',
     $template = 'template/template.php',
+    $submited;
+
+  public
     $object,
-    $submited,
-    $pageid;
+    $pagetitle,
+    $pageid,
+    $message = array();
 
   function __construct()
   {
@@ -41,7 +44,8 @@ class Action
     }
     if ( null != $this->submited['title'] && null != $this->submited['body'] )
     {
-      $this->obj->writeData($this->submited);
+      $token = $this->getCookie('token');
+      $this->obj->writeData($this->submited,$token);
     }
 
     $this->setPageId();
@@ -59,7 +63,7 @@ class Action
   {
     if (array_key_exists("id",$_GET))
     {
-      if ( $this->obj->isData($_GET['id']))
+      if ( $this->obj->isData($_GET['id']) )
       {
         return $_GET["id"];
       }
@@ -132,16 +136,10 @@ class Action
   public function setPageId()
   {
     $id = $this->getId();
+
     if ( null != $id )
     {
-      if ( $this->obj->isData($id) == false )
-      {
-        $this->pageid = '';
-      }
-      else
-      {
-        $this->pageid = $id;
-      }
+      $this->pageid = $id;
     }
     else
     {
@@ -158,11 +156,6 @@ class Action
     }
   }
 
-  public function callTemplate($file)
-  {
-    include_once($file);
-  }
-
   /*
    * objectpageに一覧を表示
    */
@@ -177,7 +170,6 @@ class Action
         if ( $this->isObject($key) )
         {
           $counter += 1;
-          //echo '<form action="#" method="post">';
           echo '<table class="objects">';
           echo '<tr class="title">';
           echo '<th class="title">';
@@ -190,22 +182,23 @@ class Action
           echo $this->object->getTitle();
           echo '</a>';
           echo '</td>';
+          echo '<td class="date">';
+          echo $this->object->getCreatedAt();
+          echo '</td>';
           echo '</tr>';
           echo '<tr>';
-          echo '<td colspan="2">';
+          echo '<td colspan="3">';
           echo '<p>';
           echo $this->renderBody($this->object->getBody());
           echo '</p>';
           echo '</td>';
           echo '</tr>';
-          //echo '<tr>';
-          //echo '<td class="delete" colspan="2">';
-          //echo '<input type="hidden" value="' . $key . '" name="delete" />';
-          //echo '<input type="submit" value="削除" />';
-          //echo '</td>';
-          //echo '</tr>';
+          echo '<tr>';
+          echo '<td class="posted_by" colspan="3">';
+          echo 'posted_by : '.$this->object->getPostedBy();
+          echo '</td>';
+          echo '</tr>';
           echo '</table>';
-          //echo '</form>';
         }
       }
     }
@@ -214,7 +207,7 @@ class Action
        echo '<table class="objects">';
        echo '<tr class="title">';
        echo '<td>';
-       echo $this->message['nodata'];
+       echo $this->obj->message['nodata'];
        echo '</td>';
        echo '</tr>';
        echo '</table>';

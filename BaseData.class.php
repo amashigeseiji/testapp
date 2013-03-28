@@ -1,5 +1,5 @@
 <?php
-class BaseData
+class BaseData extends BaseUser
 {
   private
     $basedata = array(),
@@ -8,12 +8,12 @@ class BaseData
     $defaultpath = 'data/data.txt',
     $errormessage = array(),
     $errorlog = 'data/errolog',
-    $objectsnum = 0,
+    $objectsnum = 0;
+  public
     $message = array(
       'nodata'=>'NO DATA',
       'deleted'=>'',
-      'write'=>'');
-  public
+      'write'=>''),
     $objects;
 
 
@@ -157,11 +157,14 @@ class BaseData
   {
     //データがあれば true, なければ falseを返す
     $ids = $this->getIds();
-    foreach ( $ids as $key => $value )
+    if ( isset($ids) )
     {
-      if ( $ids[$key] == $id )
+      foreach ( $ids as $key => $value )
       {
-        return true;
+        if ( $ids[$key] == $id )
+        {
+          return true;
+        }
       }
     }
 
@@ -237,7 +240,21 @@ class BaseData
     return null;
   }
 
-  public function writeData($input)
+  public function getPostedByById($id)
+  {
+    $posted_by = '';
+    for ($i = 0; $i < count($this->basedata); $i++)
+    {
+      if ( $this->basedata[$i][0] == $id && $this->basedata[$i][1] == 'posted_by')
+      {
+        return $created_at = $this->basedata[$i][2];
+      }
+    }
+
+    return null;
+  }
+
+  public function writeData($input,$token)
   {
     $this->message['write'] = '';
 
@@ -246,6 +263,7 @@ class BaseData
       if ( $this->writeBody($input) == true )
       {
         $this->writeCreatedAt();
+        $this->writePostedBy($token);
         $this->initialize();
 
         return $this->message['write'] = 'SUCCESS';
@@ -339,6 +357,16 @@ class BaseData
     $this->initialize();
   }
 
+  public function writePostedBy($token)
+  {
+    $username = $this->getUserNameByToken($token);
+    $fp = fopen($this->path, "a");
+    fwrite($fp, $this->getLastId() . ',' . 'posted_by,' . $username . "\n");
+    fclose($fp);
+    //データの更新
+    $this->initialize();
+  }
+
   public function delete($id)
   {
     if ( $this->isData($id) == true )
@@ -425,6 +453,7 @@ class BaseData
       $obj->setTitle($this->getTitleById($id));
       $obj->setBody($this->getBodyById($id));
       $obj->setCreatedAt($this->getCreatedAtById($id));
+      $obj->setPostedBy($this->getPostedByById($id));
 
       return $obj;
     }
@@ -535,19 +564,3 @@ class BaseData
   }
 
 }
-//$a=new BaseData;
-//$b=array('title'=>'tetete','body'=>'unko');
-//$a->initialize();
-//$input['body'] = "置換したよ!!\ntest";
-//$a->editBody(35,$input);
-
-//var_dump($a->getIds());
-//$input = array('title'=>'てっすと','body'=>'bodyふぁお');
-//var_dump($a->writeData($input));
-//var_dump($a->isData($a->getLastId()));
-//var_dump($a->getTitleById($a->getLastId()));
-//if ($a->isData($a->getLastId()))
-//{
-//  if ($a->getTitleById($a->getLastId()) == $input['title'])
-//  {echo 'tetete';}
-//}

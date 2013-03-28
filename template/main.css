@@ -91,6 +91,17 @@ th.title{
 td.delete{
   text-align:center;
 }
+td.date{
+  text-align:right;
+  width:120px;
+  font-size:12px;
+}
+td.posted_by{
+  text-align:right;
+  width:120px;
+  font-size:12px;
+}
+
 #write{
   margin:0px 10px;
   padding:10px 0px;

@@ -35,14 +35,20 @@ class User extends BaseUser
   {
     if ( $this->name != null)
     {
-      $token = md5(uniqid());
-      setcookie('token',$token);
-      if (!file_exists("data/token/$token"))
+      if (!file_exists("data/token/$this->name"))
       {
-        touch("data/token/$token");
-        $fp = fopen("data/token/$token","w");
-        fwrite($fp,$this->name);
+        $token = md5(uniqid());
+        setcookie('token',$token);
+
+        touch("data/token/$this->name");
+        $fp = fopen("data/token/$this->name","w");
+        fwrite($fp,$token);
         fclose($fp);
+        $this->token = $token;
+      }
+      elseif (file_exists("data/token/$this->name"))
+      {
+        $token = file_get_contents("data/token/$this->name");
         $this->token = $token;
       }
     }

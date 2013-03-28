@@ -1,14 +1,15 @@
 <?php
 include_once('action.class.php');
-class UserAction extends Action
+class UserAction
 {
   public
     $authusers = array(),
     $user,
     $baseuserobj,
-    $usernames = array(),
     $logout = 0,
     $tetete = null,
+    $tokens = array(),
+    $usernames = array(),
     $message = array();
 
 
@@ -26,6 +27,7 @@ class UserAction extends Action
     $this->usernames = array();
     $this->user = null;
     $post = null;
+    $tokens = array();
 
     $this->baseuserobj = new BaseUser;
     $this->setUserNames();
@@ -33,36 +35,34 @@ class UserAction extends Action
 
     $post = $this->getPostValue('logout');
     $cookie = $this->getCookie('token');
-    var_dump($cookie);
 
     //cookie の破棄が先!!
-    //if (array_key_exists('logout',$_POST))
     if ( null != $post )
     {
       //ログアウト処理ではクッキーを削除
       $this->deleteToken($cookie);
       $this->user = null;
+      $cookie = $this->getCookie('token');
       //ログインページを表示する
       $this->callTemplate('template/auth.php');
       $action = null;
     }
 
-    //if (array_key_exists('token',$_COOKIE) && $this->getNameByToken($_COOKIE['token']) != null )
     if ( null != $cookie )
     {
-      var_dump($_COOKIE); echo 'initialize';
       //cookieがtokenと一致すれば自動ログイン
-      //$name にbool値が入っている…
       $name = $this->getNameByToken($cookie);
       $id = $this->baseuserobj->getUserIdByName($name);
       $this->user = $this->createUser($id);
       $this->callTemplate('template/auth.php');
+      $action = new Action;
     }
-    //elseif (array_key_exists('name',$_POST) && array_key_exists('password',$_POST))
     elseif ( $this->isWebRequest('name',$_POST) && $this->isWebRequest('password',$_POST) )
     {
-      $this->Authentication($_POST);
-      $this->callTemplate('template/auth.php');
+      if ( true == $this->Authentication($_POST) )
+      {
+        $action = new Action;
+      }
     }
     else
     {
@@ -70,7 +70,6 @@ class UserAction extends Action
       $this->callTemplate('template/auth.php');
     }
 
-    //var_dump($this->user);
   }
 
   public function isWebRequest($parameter,$request)
@@ -138,13 +137,16 @@ class UserAction extends Action
       {
         $this->user = $this->createUser($id);
         $this->callTemplate('template/auth.php');
+        return true;
       }
       else
       {
         echo $this->message['auth'];
+        $this->callTemplate('template/auth.php');
+        return false;
       }
-
     }
+    return false;
   }
 
   public function auth($name,$password)
@@ -178,36 +180,37 @@ class UserAction extends Action
 
   public function getNameByToken($token)
   {
-    if (file_exists("data/token/$token"))
+    $dir = opendir('data/token');
+    while ( false != ($filename = readdir($dir)) )
     {
-      $name = file_get_contents("data/token/$token");
-
-      foreach ( $this->usernames as $key => $val )
+      foreach ( $this->usernames as $name )
       {
-        if ( $this->usernames[$key] == $name)
+        if ( $filename == $name )
         {
-
-          return $name;
+          if ( file_get_contents("data/token/$filename") == $token )
+          {
+            closedir($dir);
+            return $name;
+          }
         }
       }
-
-      return null;
     }
+    closedir($dir);
 
     return null;
   }
 
   public function deleteToken($token)
   {
-    if ( file_exists("data/token/$token") )
+    if ( null != ($name = $this->getNameByToken($token)) )
+    //if ( file_exists("data/token/$token") )
     {
-      unlink("data/token/$token");
+      unlink("data/token/$name");
     }
     if ( $_COOKIE['token'] )
     {
       setcookie("token", '', time() -1800, '/');
       $_COOKIE = array();
-      var_dump($_COOKIE); echo 'deleteToken';
     }
   }
 
@@ -238,12 +241,10 @@ class UserAction extends Action
   public function setAuthUsers()
   {
     $filenames = glob("data/token/*");
-    var_dump(file_get_contents($filenames));
     foreach ( $filenames as $val )
     {
       $this->authusers[] .= file_get_contents($filenames[$val]);
     }
-    var_dump($this->authusers);exit;
     for ($i = 0; $i < count($filenames);$i++ )
     {
       foreach ( $this->usernames as $key => $name )
@@ -270,6 +271,11 @@ class UserAction extends Action
     }
 
     header("Location:".$_SERVER['PHP_SELF']);
+  }
+
+  public function callTemplate($file)
+  {
+    include_once($file);
   }
 
   public function createUser($id)
