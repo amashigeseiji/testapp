@@ -508,13 +508,14 @@ class BaseData extends BaseUser
   {
     $objects = null;
     $ids = $this->getIds();
+
     if ( !empty($ids) );
     {
-      for ( $i = $this->getLastId(); $i > count($ids) - $num; $i-- )
+      for ( $i = $this->getLastId(); $i > 0; $i-- )
       {
         if($this->isData($i) != false)
         {
-          if ( $this->getPostedByById($i) == $name )
+          if ( $this->getPostedByById($i) == $name."\n" )
           {
             $objects[$i] = $this->createData($i);
           }

@@ -51,6 +51,10 @@ class Action extends UserAction
     }
 
     $this->posted_by = $this->getPostedBy();
+    if ( $this->posted_by != null )
+    {
+      $this->obj->objects = $this->getObjectsPostedBy($this->posted_by);
+    }
 
     $this->setPageId();
     $this->setPageTitle();
@@ -186,7 +190,7 @@ class Action extends UserAction
           echo $this->object->getId();
           echo '</th>';
           echo '<td>';
-          echo '<a href="index.php'.'?id=';
+          echo '<a href="?id=';
           echo $this->object->getId();
           echo '">';
           echo $this->object->getTitle();
@@ -202,7 +206,12 @@ class Action extends UserAction
           echo '</tr>';
           echo '<tr>';
           echo '<td class="posted_by" colspan="3">';
-          echo 'posted_by : '.$this->object->getPostedBy();
+          echo 'posted_by : ';
+          echo '<a href="?posted_by=';
+          echo $this->object->getPostedBy();
+          echo '">';
+          echo $this->object->getPostedBy();
+          echo '</a>';
           echo '&nbsp&nbsp'.date("Y/m/d H:i",(int)$this->object->getCreatedAt());
           echo '</td>';
           echo '</tr>';

@@ -128,6 +128,10 @@ class BaseUser
     return null;
   }
 
+  public function registerUser()
+  {
+  }
+
   public function createUser($id)
   {
     if ( $this->isUser($id) == true )
