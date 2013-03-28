@@ -6,7 +6,7 @@ class Data
    $title,
    $body,
    $created_at,
-   $user,
+   $posted_by,
    $delkey = false;
 
   public function getId()
@@ -49,13 +49,13 @@ class Data
     $this->created_at = $created_at;
   }
 
-  public function getUser()
+  public function getPostedBy()
   {
-    return $this->user;
+    return $this->posted_by;
   }
 
-  public function setUser($user)
+  public function setPostedBy($user)
   {
-    $this->user = $user;
+    $this->posted_by = $user;
   }
 }

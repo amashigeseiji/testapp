@@ -1,12 +1,15 @@
 <?php
 include_once('action.class.php');
-class UserAction extends Action
+class UserAction
 {
   public
-    $authusers = array();
-  public
-    $baseusers,
-    $logout = 0;
+    $authusers = array(),
+    $user,
+    $baseuserobj,
+    $tokens = array(),
+    $usernames = array(),
+    $cookie = null,
+    $message = array();
 
 
   function __construct()
@@ -16,19 +19,48 @@ class UserAction extends Action
 
   public function initialize()
   {
-    if ( array_key_exists('logout',$_GET) && $_GET['logout'] == 1 )
+    include_once('baseuser.class.php');
+    $this->baseuserobj = null;
+    $this->action = null;
+    $this->authusers = array();
+    $this->usernames = array();
+    $this->user = null;
+    $post = null;
+    $this->cookie = null;
+    $tokens = array();
+
+    $this->baseuserobj = new BaseUser;
+    $this->setUserNames();
+
+
+    $post = $this->getPostValue('logout');
+    //$logout = $this->getGetValue('logout');
+    $this->cookie = $this->getCookie('token');
+
+    //cookie の破棄が先!!
+    if ( null != $post )
     {
-      $this->logout();
+      $this->logout($this->cookie);
     }
-    else
+
+    $this->login($this->cookie);
+  }
+
+  public function login($cookie)
+  {
+    if ( null != $cookie )
     {
-      session_start();
-      include_once('baseuser.class.php');
-      $this->baseusers = new BaseUser;
-      var_dump($_SESSION);
-      if ( isset($_SESSION['id']) )
+      //cookieがtokenと一致すれば自動ログイン
+      $name = $this->getNameByToken($cookie);
+      $id = $this->baseuserobj->getUserIdByName($name);
+      $this->user = $this->createUser($id);
+      $action = new Action;
+    }
+    elseif ( $this->isWebRequest('name',$_POST) && $this->isWebRequest('password',$_POST) )
+    {
+      if ( true == $this->Authentication($_POST) )
       {
-        $this->authusers[] .= $_SESSION['id'];
+        header("Location: $_SERVER[PHP_SELF]");
         $action = new Action;
       }
       else
@@ -36,60 +68,246 @@ class UserAction extends Action
         $this->callTemplate('template/auth.php');
       }
     }
+    else
+    {
+      $this->user = null;
+      $this->callTemplate('template/auth.php');
+    }
   }
 
-  public function Authentication()
+  public function logout($cookie)
   {
-    if ( isset($_POST['name']) && isset($_POST['password']) )
-    {
-      if ( $this->baseusers->Authentication($_POST['name'],$_POST['password']) )
-      {
-        $_SESSION['id'] = $this->baseusers->getUserIdByName($_POST['name']);
-        $this->authusers[] .= $this->baseusers->getUserIdByName($_POST['name']);
-        $this->initialize();
-      }
-      else
-      {
-        echo $this->baseusers->message['auth'];
-      }
+    //ログアウト処理ではクッキーを削除
+    $this->deleteToken($cookie);
+    $this->user = null;
+    $this->cookie = $this->getCookie('token');
+    //ログインページを表示する
+    //header("Location: $_SERVER[PHP_SELF]");
+    $this->callTemplate('template/auth.php');
+    $action = null;
+  }
 
+  public function getBaseUserObj()
+  {
+    return new BaseUser;
+  }
+
+  public function isWebRequest($parameter,$request)
+  {
+    if ( array_key_exists($parameter,$request) )
+    {
+      return true;
     }
     else
     {
+      return false;
     }
+  }
+
+  public function getGetValue($parameter)
+  {
+    if ( true == $this->isWebRequest($parameter,$_GET) )
+    {
+      return $_GET[$parameter];
+    }
+    else
+    {
+      return null;
+    }
+  }
+
+  public function getPostValue($parameter)
+  {
+    if ( true == $this->isWebRequest($parameter,$_POST) )
+    {
+      if ( '' != $_POST[$parameter] )
+      {
+        return $_POST[$parameter];
+      }
+      else
+      {
+        return null;
+      }
+    }
+    else
+    {
+      return null;
+    }
+  }
+
+  public function getCookie($parameter)
+  {
+    if ( true == $this->isWebRequest($parameter,$_COOKIE) )
+    {
+      return $_COOKIE[$parameter];
+    }
+    else
+    {
+      return null;
+    }
+  }
+
+  public function Authentication($post)
+  {
+    if ( isset($post['name']) && isset($post['password']) )
+    {
+      $name = $post['name'];
+      $id = $this->baseuserobj->getUserIdByName($name);
+      if ( $this->auth($post['name'],$post['password']) == true )
+      {
+        $this->user = $this->createUser($id);
+        return true;
+      }
+      else
+      {
+        echo $this->message['auth'];
+        return false;
+      }
+    }
+    return false;
+  }
+
+  public function auth($name,$password)
+  {
+    if ( empty($name) )
+    {
+      $this->message['auth'] = '名前を入力してください。';
+      return false;
+    }
+    if ( empty($password) )
+    {
+      $this->message['auth'] = 'パスワードを入力してください。';
+      return false;
+    }
+
+    if ( $id = $this->baseuserobj->getUserIdByName($name) );
+    {
+      if ( $this->baseuserobj->getPasswordById($id) == $password )
+      {
+        $this->authusers[] .= $id;
+        return true;
+      }
+
+      $this->message['auth'] = 'パスワードが違います。';
+      return false;
+    }
+
+    $this->message['auth'] = 'ユーザーが存在しません.';
+    return false;
+  }
+
+  public function getNameByToken($token)
+  {
+    $dir = opendir('data/token');
+    $usernames = $this->getUserNames();
+
+    while ( false != ($filename = readdir($dir)) )
+    {
+      foreach ( $usernames as $name )
+      {
+        if ( $filename == $name )
+        {
+          if ( file_get_contents("data/token/$filename") == $token )
+          {
+            closedir($dir);
+            return $name;
+          }
+        }
+      }
+    }
+    closedir($dir);
+
+    return null;
+  }
+
+  public function deleteToken($token)
+  {
+    if ( null != ($name = $this->getNameByToken($token)) )
+    //if ( file_exists("data/token/$token") )
+    {
+      unlink("data/token/$name");
+    }
+    if ( $_COOKIE['token'] )
+    {
+      setcookie("token", '', time() -1800, '/');
+      $_COOKIE = array();
+    }
+  }
+
+  public function getToken($name)
+  {
+    if ( file_exists("data/token/$name"))
+    {
+      $token = file_get_contents("data/token/$name");
+
+      return $token;
+    }
+    else
+    {
+
+      return null;
+    }
+  }
+
+  public function setUserNames()
+  {
+    $baseusers = $this->baseuserobj->getBaseUsers();
+    foreach ( $baseusers as $key => $value )
+    {
+      $this->usernames[] .= $baseusers[$key][1];
+    }
+  }
+
+  public function getUserNames()
+  {
+    $baseusers = $this->getBaseUserObj()->getBaseUsers();
+    $usernames = array();
+    foreach ( $baseusers as $key => $value )
+    {
+      $usernames[] .= $baseusers[$key][1];
+    }
+    return $usernames;
   }
 
   public function setAuthUsers()
   {
-    fopen("data/$username",w);
+    $filenames = glob("data/token/*");
+    foreach ( $filenames as $val )
+    {
+      $this->authusers[] .= file_get_contents($filenames[$val]);
+    }
+    for ($i = 0; $i < count($filenames);$i++ )
+    {
+      foreach ( $this->usernames as $key => $name )
+      {
+        if( ($filenames[$i] == 'data/token/'. $name) == true )
+        {
+          $this->authusers[] .= $name;
+        }
+      }
+    }
   }
 
   public function getAuthUsers()
   {
   }
 
-  public function isAuthenticated()
+  public function callTemplate($file)
   {
+    include_once($file);
   }
 
-  public function logout()
+  public function createUser($id)
   {
-    $_SESSION = array();
-    if (isset($_COOKIE["PHPSESSID"]))
+    if ( $this->baseuserobj->isUser($id) == true )
     {
-      setcookie("PHPSESSID", '', time() - 1800, '/');
+      include_once('user.class.php');
+      $user = new User;
+      $user->setUserId($id);
+      $user->setName($id);
+      $user->setToken();
+
+      return $user;
     }
-
-    //var_dump($_SESSION);
-    //session_destroy();
-    header("Location: http://test2.local");
   }
-}
-
-
-$auth = new UserAction;
-if ( isset($_POST['name']) && isset($_POST['password']) )
-{
-  $auth->Authentication();
-  var_dump($_SESSION);
 }

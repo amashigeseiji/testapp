@@ -10,7 +10,14 @@ body{
 }
 
 #header{
+  float:left;
   padding:20px;
+}
+#logout
+{
+  float:right;
+  width:200px;
+  text-align:right;
 }
 #header a:link,a:visited{
   color:#000;
@@ -18,7 +25,7 @@ body{
 }
 
 #sidebar{
-  float:left;
+  clear:both;
   width:20%;
 }
 #sidebar li{
@@ -38,7 +45,7 @@ body{
 
 #content{
   border-radius:8px;
-  background-color:#bbbfdd;
+  background-color:#bbbfd0;
   width:auto;
   height:auto;
   color:#555;
@@ -91,11 +98,25 @@ th.title{
 td.delete{
   text-align:center;
 }
+td.date{
+  text-align:right;
+  width:120px;
+  font-size:12px;
+}
+td.posted_by{
+  text-align:right;
+  width:120px;
+  font-size:12px;
+}
+
 #write{
   margin:0px 10px;
   padding:10px 0px;
   background-color:#707070;
   border-radius: 8px;
+}
+#write .input{
+  margin:auto;
 }
 
 td.error{
@@ -108,7 +129,7 @@ td.error{
 
 #objectpage{
   border-radius:8px;
-  background-color:#bbbfdd;
+  background-color:#bbbfd0;
   width:auto;
   height:auto;
   color:#555;
@@ -116,8 +137,21 @@ td.error{
   padding:20px;
 }
 #objectpage table{
-  margin:15px;
+  margin-left:auto;
+  margin-right:auto;
+  margin-top:15px;
   width:90%;
 }
+#objectpage td.title{
+  text-align:center;
+  background-color:#aaa;
+}
+#objectpage p{
+  margin-left:50px;
+}
+#objectpage td.posted_by{
+  background-color:#bbb;
+}
+
 #footer{
 }
