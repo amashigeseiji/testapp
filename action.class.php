@@ -5,6 +5,7 @@ class Action extends UserAction
   private
     $defaulttitle = 'testpage',
     $template = 'template/template.php',
+    $posted_by = '',
     $submited;
 
   public
@@ -33,6 +34,7 @@ class Action extends UserAction
       'delete'  => '',
     );
     $this->pageid = '';
+    $this->posted_by = '';
 
     $this->createInstance();
 
@@ -47,6 +49,8 @@ class Action extends UserAction
       $token = $this->getCookie('token');
       $this->obj->writeData($this->submited,$token);
     }
+
+    $this->posted_by = $this->getPostedBy();
 
     $this->setPageId();
     $this->setPageTitle();
@@ -188,9 +192,6 @@ class Action extends UserAction
           echo $this->object->getTitle();
           echo '</a>';
           echo '</td>';
-          //echo '<td class="date">';
-          //echo $this->object->getCreatedAt();
-          //echo '</td>';
           echo '</tr>';
           echo '<tr>';
           echo '<td colspan="2">';
@@ -219,6 +220,24 @@ class Action extends UserAction
        echo '</tr>';
        echo '</table>';
     }
+  }
+
+  public function getPostedBy()
+  {
+    $posted_by = null;
+    if ( null != ($name = $this->getGetValue('posted_by')) )
+    {
+      return $name;
+    }
+  }
+
+  public function getObjectsPostedBy($name)
+  {
+    return $this->obj->sortPostedBy($name);
+  }
+
+  public function renderPostedBy()
+  {
   }
 
   public function renderError()

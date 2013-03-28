@@ -7,37 +7,28 @@
 <title>login</title>
 </head>
 <body>
+<div id="auth">
   <form action="#" method="post">
-    <table>
+    <table class="auth">
       <tr>
-        <th>name</th>
+        <td class="title">name</td>
         <td><input type="text" name="name"></td>
       </tr>
 
       <tr>
-        <th>password</th>
+        <td class="title">password</td>
         <td><input type="password" name="password"></td>
       </tr>
 
       <tr>
-        <td>
+        <td class="title" colspan="2">
           <input type="submit" value="送信" />
         </td>
       </tr>
 
     </table>
   </form>
-
-<!--  <?php //else: ?>
-    <div id="logout">
-      <?php //echo 'login:'.$this->user->getName() ?>
-      <form action="#" method="post" >
-        <input type="submit" name="logout" value="logout" />
-      </form>
-    </div>
-
-    <?php //$action = null; $action = new Action; ?>
--->
+</div>
 <?php endif; ?>
 </body>
 </html>

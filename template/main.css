@@ -127,6 +127,7 @@ td.error{
 
 }
 
+
 #objectpage{
   border-radius:8px;
   background-color:#bbbfd0;
@@ -152,6 +153,30 @@ td.error{
 #objectpage td.posted_by{
   background-color:#bbb;
 }
+
+#auth{
+  margin-left:50px;
+}
+#auth table.auth{
+  border-radius: 0px;
+  border-collapse:collapse;
+  background-color:#888;
+  border-radius: 8px;
+}
+#auth tr{
+  border:1px #888 solid;
+}
+#auth td{
+  border-radius: 0px;
+  border:1px #979a9f solid;
+}
+#auth td.title{
+  background-color:#888;
+  text-align:center;
+  font-size:15px;
+  font-style:normal;
+}
+
 
 #footer{
 }

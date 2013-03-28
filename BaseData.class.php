@@ -247,7 +247,7 @@ class BaseData extends BaseUser
     {
       if ( $this->basedata[$i][0] == $id && $this->basedata[$i][1] == 'posted_by')
       {
-        return $created_at = $this->basedata[$i][2];
+        return $posted_by = $this->basedata[$i][2];
       }
     }
 
@@ -501,6 +501,27 @@ class BaseData extends BaseUser
           $num + 1;
         }
       }
+    }
+  }
+
+  public function sortPostedBy($name)
+  {
+    $objects = null;
+    $ids = $this->getIds();
+    if ( !empty($ids) );
+    {
+      for ( $i = $this->getLastId(); $i > count($ids) - $num; $i-- )
+      {
+        if($this->isData($i) != false)
+        {
+          if ( $this->getPostedByById($i) == $name )
+          {
+            $objects[$i] = $this->createData($i);
+          }
+        }
+      }
+
+      return $objects;
     }
   }
 
