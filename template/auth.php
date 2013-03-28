@@ -8,7 +8,9 @@
 </head>
 <body>
   <form action="#" method="post">
-
+  <?php //if ($message = $this->message['auth'] != null): ?>
+  <?php //echo $message ?>
+  <?php //endif; ?>
     <table>
       <tr>
         <th>name</th>

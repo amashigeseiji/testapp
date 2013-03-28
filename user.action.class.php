@@ -25,36 +25,43 @@ class UserAction extends Action
     $this->authusers = array();
     $this->usernames = array();
     $this->user = null;
+    $post = null;
 
     $this->baseuserobj = new BaseUser;
     $this->setUserNames();
 
+
+    $post = $this->getPostValue('logout');
+    $cookie = $this->getCookie('token');
+    var_dump($cookie);
+
     //cookie の破棄が先!!
-    if (array_key_exists('logout',$_POST))
+    //if (array_key_exists('logout',$_POST))
+    if ( null != $post )
     {
       //ログアウト処理ではクッキーを削除
-      $this->deleteToken($_COOKIE['token']);
+      $this->deleteToken($cookie);
       $this->user = null;
       //ログインページを表示する
       $this->callTemplate('template/auth.php');
       $action = null;
     }
 
-    if (array_key_exists('token',$_COOKIE) && $this->getNameByToken($_COOKIE['token']) != null )
+    //if (array_key_exists('token',$_COOKIE) && $this->getNameByToken($_COOKIE['token']) != null )
+    if ( null != $cookie )
     {
+      var_dump($_COOKIE); echo 'initialize';
       //cookieがtokenと一致すれば自動ログイン
       //$name にbool値が入っている…
-      $name = $this->getNameByToken($_COOKIE['token']);
-      //$name = $this->getNameByToken($_COOKIE['token']);
+      $name = $this->getNameByToken($cookie);
       $id = $this->baseuserobj->getUserIdByName($name);
-      //$this->user = $this->baseuserobj->createUser($id);
       $this->user = $this->createUser($id);
       $this->callTemplate('template/auth.php');
     }
-    elseif (array_key_exists('name',$_POST) && array_key_exists('password',$_POST))
+    //elseif (array_key_exists('name',$_POST) && array_key_exists('password',$_POST))
+    elseif ( $this->isWebRequest('name',$_POST) && $this->isWebRequest('password',$_POST) )
     {
       $this->Authentication($_POST);
-      //$action = new Action;
       $this->callTemplate('template/auth.php');
     }
     else
@@ -66,38 +73,58 @@ class UserAction extends Action
     //var_dump($this->user);
   }
 
-  public function getHeaderStatus()
+  public function isWebRequest($parameter,$request)
   {
-    if (array_key_exists('token',$_COOKIE))
+    if ( array_key_exists($parameter,$request) )
     {
-      //cookieがtokenと一致すれば自動ログイン
-      $name = $this->getNameByToken($_COOKIE['token']);
-      $id = $this->baseuserobj->getUserIdByName($name);
-      //$this->user = $this->baseuserobj->createUser($id);
-      $this->user = $this->createUser($id);
-      $this->callTemplate('template/auth.php');
+      return true;
     }
     else
     {
-      $this->callTemplate('template/auth.php');
+      return false;
     }
+  }
 
-    if (array_key_exists('logout',$_POST))
+  public function getGetValue($parameter)
+  {
+    if ( true == $this->isWebRequest($parameter,$_GET) )
     {
-      //ログアウト処理ではクッキーを削除
-      $this->tetete = 'tetete';
-      $this->deleteToken($_COOKIE['token']);
-      $this->user = null;
-      //ログインページを表示する
-      //$this->callTemplate('template/auth.php');
-      //$action = null;
+      return $_GET[$parameter];
     }
-
-    if (array_key_exists('name',$_POST) && array_key_exists('password',$_POST))
+    else
     {
-      $this->Authentication($_POST);
-      //$action = new Action;
-      $this->callTemplate('template/auth.php');
+      return null;
+    }
+  }
+
+  public function getPostValue($parameter)
+  {
+    if ( true == $this->isWebRequest($parameter,$_POST) )
+    {
+      if ( '' != $_POST[$parameter] )
+      {
+        return $_POST[$parameter];
+      }
+      else
+      {
+        return null;
+      }
+    }
+    else
+    {
+      return null;
+    }
+  }
+
+  public function getCookie($parameter)
+  {
+    if ( true == $this->isWebRequest($parameter,$_COOKIE) )
+    {
+      return $_COOKIE[$parameter];
+    }
+    else
+    {
+      return null;
     }
   }
 
@@ -109,10 +136,7 @@ class UserAction extends Action
       $id = $this->baseuserobj->getUserIdByName($name);
       if ( $this->auth($post['name'],$post['password']) == true )
       {
-        //$this->user = $this->baseuserobj->createUser($id);
         $this->user = $this->createUser($id);
-        //$action = new Action;
-        //parent::initialize();
         $this->callTemplate('template/auth.php');
       }
       else
@@ -120,9 +144,6 @@ class UserAction extends Action
         echo $this->message['auth'];
       }
 
-    }
-    else
-    {
     }
   }
 
@@ -181,6 +202,12 @@ class UserAction extends Action
     if ( file_exists("data/token/$token") )
     {
       unlink("data/token/$token");
+    }
+    if ( $_COOKIE['token'] )
+    {
+      setcookie("token", '', time() -1800, '/');
+      $_COOKIE = array();
+      var_dump($_COOKIE); echo 'deleteToken';
     }
   }
 
