@@ -247,7 +247,7 @@ class BaseData extends BaseUser
     {
       if ( $this->basedata[$i][0] == $id && $this->basedata[$i][1] == 'posted_by')
       {
-        return $posted_by = $this->basedata[$i][2];
+        return $posted_by = str_replace(array("\r\n","\r","\n"),'',$this->basedata[$i][2]);
       }
     }
 
@@ -515,7 +515,7 @@ class BaseData extends BaseUser
       {
         if($this->isData($i) != false)
         {
-          if ( $this->getPostedByById($i) == $name."\n" )
+          if ( $this->getPostedByById($i) == $name )
           {
             $objects[$i] = $this->createData($i);
           }
