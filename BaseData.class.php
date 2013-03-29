@@ -192,7 +192,7 @@ class BaseData extends BaseUser
     {
       if ( $this->basedata[$i][0] == $id && $this->basedata[$i][1] == 'title')
       {
-        return $title = $this->basedata[$i][2];
+        return $title = str_replace(array("\r\n","\r","\n"),'',$this->basedata[$i][2]);
       }
     }
 
@@ -233,7 +233,7 @@ class BaseData extends BaseUser
     {
       if ( $this->basedata[$i][0] == $id && $this->basedata[$i][1] == 'created_at')
       {
-        return $created_at = $this->basedata[$i][2];
+        return $created_at = str_replace(array("\r\n","\r","\n"),'',$this->basedata[$i][2]);
       }
     }
 
@@ -296,7 +296,8 @@ class BaseData extends BaseUser
         $this->initialize();
       }
 
-      if ( $this->isData($this->getLastId()) && $this->getTitleById($this->getLastId()) == $input['title'] . "\n" )
+      //書き込みデータの整合性チェック
+      if ( $this->isData($this->getLastId()) && $this->getTitleById($this->getLastId()) == $input['title'] )
       {
 
         return true;
