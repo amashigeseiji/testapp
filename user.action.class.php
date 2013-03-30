@@ -3,10 +3,8 @@ include_once('action.class.php');
 class UserAction
 {
   public
-    $authusers = array(),
     $user,
     $baseuserobj,
-    $tokens = array(),
     $usernames = array(),
     $cookie = null,
     $message = array();
@@ -22,23 +20,19 @@ class UserAction
     include_once('baseuser.class.php');
     $this->baseuserobj = null;
     $this->action = null;
-    $this->authusers = array();
     $this->usernames = array();
     $this->user = null;
-    $post = null;
     $this->cookie = null;
-    $tokens = array();
+
 
     $this->baseuserobj = new BaseUser;
     $this->setUserNames();
 
-
-    $post = $this->getPostValue('logout');
     //$logout = $this->getGetValue('logout');
     $this->cookie = $this->getCookie('token');
 
     //cookie の破棄が先!!
-    if ( null != $post )
+    if ( null != $this->getPostValue('logout') )
     {
       $this->logout($this->cookie);
     }
@@ -60,7 +54,7 @@ class UserAction
     {
       if ( true == $this->Authentication($_POST) )
       {
-        header("Location: $_SERVER[PHP_SELF]");
+        header("Location: /");
         $action = new Action;
       }
       else
@@ -82,7 +76,7 @@ class UserAction
     $this->user = null;
     $this->cookie = $this->getCookie('token');
     //ログインページを表示する
-    //header("Location: $_SERVER[PHP_SELF]");
+    header("Location: /");
     $this->callTemplate('template/auth.php');
     $action = null;
   }
@@ -153,6 +147,12 @@ class UserAction
     {
       $name = $post['name'];
       $id = $this->baseuserobj->getUserIdByName($name);
+
+      if ( null != $this->getTokenByName($_POST['name']) )
+      {
+        unlink("data/token/$name");
+      }
+
       if ( $this->auth($post['name'],$post['password']) == true )
       {
         $this->user = $this->createUser($id);
@@ -234,7 +234,7 @@ class UserAction
     }
   }
 
-  public function getToken($name)
+  public function getTokenByName($name)
   {
     if ( file_exists("data/token/$name"))
     {
@@ -267,29 +267,6 @@ class UserAction
       $usernames[] .= $baseusers[$key][1];
     }
     return $usernames;
-  }
-
-  public function setAuthUsers()
-  {
-    $filenames = glob("data/token/*");
-    foreach ( $filenames as $val )
-    {
-      $this->authusers[] .= file_get_contents($filenames[$val]);
-    }
-    for ($i = 0; $i < count($filenames);$i++ )
-    {
-      foreach ( $this->usernames as $key => $name )
-      {
-        if( ($filenames[$i] == 'data/token/'. $name) == true )
-        {
-          $this->authusers[] .= $name;
-        }
-      }
-    }
-  }
-
-  public function getAuthUsers()
-  {
   }
 
   public function callTemplate($file)

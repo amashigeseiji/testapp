@@ -9,13 +9,13 @@
 <body>
   <div id="container">
     <div id="header">
-    <a href="http://test2.local/">test2.local</a>
+    <a href="http://test2.local">test2.local</a>
     </div>
 
     <div id="logout">
       <?php echo 'login : ' . $this->getLoginUserName() ?>
-      <!--<a href="index.php/?logout=<?php //echo $this->getCookie('token') ?>">logout</a>-->
-      <form action="#" method="post" >
+      <!--<a href="?logout=<?php //echo $this->getCookie('token') ?>">logout</a>-->
+      <form name="test" action="#" method="post" >
         <input type="submit" name="logout" value="logout" />
       </form>
     </div>

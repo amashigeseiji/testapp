@@ -254,6 +254,41 @@ class BaseData extends BaseUser
     return null;
   }
 
+  public function getDataById($id,$arg)
+  {
+    if ( $arg != 'body' )
+    {
+      for ($i = 0; $i < count($this->basedata); $i++)
+      {
+        if ( $this->basedata[$i][0] == $id && $this->basedata[$i][1] == $arg )
+        {
+          return str_replace(array("\r\n","\r","\n"),'',$this->basedata[$i][2]);
+        }
+      }
+
+      return null;
+    }
+    else
+    {
+      $body = '';
+      $tmp = array();
+      for ($i = 0; $i <= count($this->basedata) - 1; $i++)
+      {
+        if ( $this->basedata[$i][0] == $id && $this->basedata[$i][1] == 'body')
+        {
+          $tmp[] = $this->basedata[$i][2];
+        }
+      }
+
+      for ( $i = 0; $i <= count($tmp) -1; $i++)
+      {
+        $body .= $tmp[$i];
+      }
+
+      return $body;
+    }
+  }
+
   public function writeData($input,$token)
   {
     $this->message['write'] = '';

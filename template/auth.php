@@ -29,6 +29,6 @@
     </table>
   </form>
 </div>
-<?php endif; ?>
 </body>
 </html>
+<?php endif; ?>

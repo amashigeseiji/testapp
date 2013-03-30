@@ -245,10 +245,6 @@ class Action extends UserAction
     return $this->obj->sortPostedBy($name);
   }
 
-  public function renderPostedBy()
-  {
-  }
-
   public function renderError()
   {
     if( isset($this->message) )

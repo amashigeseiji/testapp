@@ -58,4 +58,13 @@ class Data
   {
     $this->posted_by = $user;
   }
+
+  public function setData()
+  {
+    $this->setId($id);
+    $this->setTitle($title);
+    $this->setBody($body);
+    $this->setCreatedAt($created_at);
+    $this->setPostedBy($posted_by);
+  }
 }
