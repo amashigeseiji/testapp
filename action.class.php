@@ -50,10 +50,13 @@ class Action extends UserAction
       $this->obj->writeData($this->submited,$token);
     }
 
-    $this->posted_by = $this->getPostedBy();
-    if ( $this->posted_by != null )
+    if ( null != $this->getGetValue('posted_by') )
     {
-      $this->obj->objects = $this->getObjectsPostedBy($this->posted_by);
+      $this->obj->objects = $this->getObjectsPostedBy($this->getGetValue('posted_by'));
+    }
+    if ( null != $this->getGetValue('title') )
+    {
+      $this->obj->objects = $this->getObjectsByTitle($this->getGetValue('title'));
     }
 
     $this->setPageId();
@@ -124,16 +127,6 @@ class Action extends UserAction
     }
   }
 
-  public function escape($text)
-  {
-    return htmlspecialchars($text);
-  }
-
-  public function renderBody($text)
-  {
-    return str_replace(array("\r\n","\r","\n"),'<br />',$this->escape($text));
-  }
-
   public function setPageTitle()
   {
     $id = $this->getId();
@@ -159,6 +152,16 @@ class Action extends UserAction
     {
       $this->pageid = '';
     }
+  }
+
+  public function escape($text)
+  {
+    return htmlspecialchars($text);
+  }
+
+  public function renderBody($text)
+  {
+    return str_replace(array("\r\n","\r","\n"),'<br />',$this->escape($text));
   }
 
   public function callHtml($file)
@@ -231,18 +234,14 @@ class Action extends UserAction
     }
   }
 
-  public function getPostedBy()
-  {
-    $posted_by = null;
-    if ( null != ($name = $this->getGetValue('posted_by')) )
-    {
-      return $name;
-    }
-  }
-
   public function getObjectsPostedBy($name)
   {
-    return $this->obj->sortPostedBy($name);
+    return $this->obj->sortByArgs('posted_by',$name);
+  }
+
+  public function getObjectsByTitle($title)
+  {
+    return $this->obj->sortByArgs('title',$title);
   }
 
   public function renderError()

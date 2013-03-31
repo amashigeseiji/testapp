@@ -34,7 +34,7 @@ class UserAction
     //cookie の破棄が先!!
     if ( null != $this->getPostValue('logout') )
     {
-      $this->logout($this->cookie);
+      $this->logout($this->getPostValue('logout'));
     }
 
     $this->login($this->cookie);

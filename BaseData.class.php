@@ -53,8 +53,6 @@ class BaseData extends BaseUser
       $this->basedata[$i] = explode(",", $lines[$i]);
     }
 
-    //var_dump($this->basedata);exit;
-    //echo count($this->basedata);exit;
   }
 
   public function setPath($file)
@@ -103,11 +101,11 @@ class BaseData extends BaseUser
 
   public function getIds()
   {
+    //依存関係上このオブジェクトの正常性を保証するのがこのメソッド
     $ids = array();
 
     if ( $this->linecount != 0 )
     {
-      //依存関係上このオブジェクトの正常性を保証するのがこのメソッド
       //初回書き込み時にはこの条件に合致するので必須
       if ( $this->linecount == 1 )
       {
@@ -540,9 +538,9 @@ class BaseData extends BaseUser
     }
   }
 
-  public function sortPostedBy($name)
+  public function sortByArgs($args,$name)
   {
-    $objects = null;
+    $objects = array();
     $ids = $this->getIds();
 
     if ( !empty($ids) );
@@ -551,7 +549,7 @@ class BaseData extends BaseUser
       {
         if($this->isData($i) != false)
         {
-          if ( $this->getPostedByById($i) == $name )
+          if ( $this->getDataById($i,$args) == $name )
           {
             $objects[$i] = $this->createData($i);
           }

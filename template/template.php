@@ -8,16 +8,17 @@
 
 <body>
   <div id="container">
+
     <div id="header">
-    <a href="http://test2.local">test2.local</a>
+      <a href="/">test2.local</a>
     </div>
 
     <div id="logout">
-      <?php echo 'login : ' . $this->getLoginUserName() ?>
-      <!--<a href="?logout=<?php //echo $this->getCookie('token') ?>">logout</a>-->
-      <form name="test" action="#" method="post" >
-        <input type="submit" name="logout" value="logout" />
+      <form action="/" method="post" name="fm1">
+        <input type="hidden" name="logout" value="<?php echo $this->getCookie('token') ?>" />
+        <a href="#" onclick="document.fm1.submit();">logout</a>
       </form>
+      <?php echo 'login : ' . $this->getLoginUserName() ?>
     </div>
 
     <div id="sidebar">
