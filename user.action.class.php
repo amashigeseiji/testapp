@@ -37,6 +37,30 @@ class UserAction
       $this->logout($this->getPostValue('logout'));
     }
 
+    if ( $this->isWebRequest('newname',$_POST) && $this->isWebRequest('newpassword',$_POST) )
+    {
+      if ( null == ($newname = $this->getPostValue('newname')) )
+      {
+        $this->message['register'] = 'ユーザー名は必須項目です.';
+      }
+      elseif ( null == ($newpassword = $this->getPostValue('newpassword')) )
+      {
+        $this->message['register'] = 'パスワードは必須項目です.';
+      }
+      else
+      {
+        if ( false ==  $this->getBaseUserObj()->registerUser($newname,$newpassword) )
+        {
+          $this->message['register'] = 'ユーザー名が重複しています.';
+        }
+        else
+        {
+          $this->message['register'] = '新規ユーザーを登録しました.';
+          header("Location: /");
+        }
+      }
+    }
+
     $this->login($this->cookie);
   }
 
@@ -46,6 +70,13 @@ class UserAction
     {
       //cookieがtokenと一致すれば自動ログイン
       $name = $this->getNameByToken($cookie);
+
+      if ( null == $name )
+      {
+        $this->logout($cookie);
+        return;
+      }
+
       $id = $this->baseuserobj->getUserIdByName($name);
       $this->user = $this->createUser($id);
       $action = new Action;
@@ -160,7 +191,6 @@ class UserAction
       }
       else
       {
-        echo $this->message['auth'];
         return false;
       }
     }
@@ -184,7 +214,6 @@ class UserAction
     {
       if ( $this->baseuserobj->getPasswordById($id) == $password )
       {
-        $this->authusers[] .= $id;
         return true;
       }
 

@@ -1,3 +1,4 @@
+/* vim: set foldmethod=marker: */
 body{
   max-width:100%;
   background-color:#a0b0b5;
@@ -9,6 +10,7 @@ body{
   margin: 0 auto;
 }
 
+/* header {{{*/
 #header{
   float:left;
   padding:20px;
@@ -19,11 +21,22 @@ body{
   width:200px;
   text-align:right;
 }
+#logout a:link,a:visited{
+  text-decoration:none;
+  color: #005090;
+}
+#logout a:hover{
+  color: #bb8011;
+}
+
+
 #header a:link,a:visited{
   color:#000;
   text-decoration:none;
 }
+/* header }}}*/
 
+/* sidebar{{{ */
 #sidebar{
   clear:both;
   width:20%;
@@ -42,7 +55,9 @@ body{
 #sidebar a:hover{
   color: #b48011;
 }
+/* sidebar}}} */
 
+/* content{{{ */
 #content{
   border-radius:8px;
   background-color:#bbbfd0;
@@ -72,6 +87,8 @@ body{
 #content a:hover{
   color: #b48011;
 }
+/* content}}} */
+
 td{
   font-style:normal;
   background-color: #ddd;
@@ -109,6 +126,7 @@ td.posted_by{
   font-size:12px;
 }
 
+/* write{{{ */
 #write{
   margin:0px 10px;
   padding:10px 0px;
@@ -118,6 +136,7 @@ td.posted_by{
 #write .input{
   margin:auto;
 }
+/* write}}} */
 
 td.error{
   color: #a55;
@@ -127,7 +146,7 @@ td.error{
 
 }
 
-
+/* objectpage{{{ */
 #objectpage{
   border-radius:8px;
   background-color:#bbbfd0;
@@ -153,7 +172,10 @@ td.error{
 #objectpage td.posted_by{
   background-color:#bbb;
 }
+/* objectpage}}} */
 
+
+/* auth{{{ */
 #auth{
   margin-left:50px;
 }
@@ -161,7 +183,6 @@ td.error{
   border-radius: 0px;
   border-collapse:collapse;
   background-color:#888;
-  border-radius: 8px;
 }
 #auth tr{
   border:1px #888 solid;
@@ -176,7 +197,65 @@ td.error{
   font-size:15px;
   font-style:normal;
 }
+/* auth}}} */
+/* entry{{{ */
+#entry{
+  margin:0px;
+  padding:0px;
+  background-color:none;
+  font-size:12px;
+  font-style:normal;
+}
+#entry a:link,a:visited{
+  text-decoration:none;
+  color: #005090;
+}
+#entry a:hover{
+  color: #b48011;
+  text-decoration:underline;
+}
+/* entry}}} */
 
+
+/* newentry{{{ */
+#newentry{
+  margin-left:50px;
+}
+#newentry table.auth{
+  border-radius: none;
+  border-collapse:collapse;
+  background-color:#888;
+}
+#newentry tr{
+  border-radius: none;
+  border:1px #888 solid;
+}
+#newentry td{
+  border-radius: none;
+  border:1px #979a9f solid;
+}
+#newentry td.title{
+  border-radius: none;
+  background-color:#888;
+  text-align:center;
+  font-size:13px;
+  font-style:normal;
+}
+/* newentry}}} */
+
+.back{
+  margin:0px;
+  padding:0px;
+  background-color:none;
+  font-size:12px;
+  font-style:normal;
+}
+
+.error{
+  color: red;
+  text-align:center;
+  font-size:13px;
+}
 
 #footer{
 }

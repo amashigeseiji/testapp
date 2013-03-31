@@ -5,7 +5,6 @@ class BaseUser
     $path = 'data/user.txt';
 
   public
-    $authusers = array(),
     $message   = array(
         'auth' => '',
       ),
@@ -121,15 +120,48 @@ class BaseUser
     {
       if ( $baseusers[$key][0] == $id )
       {
-        return $baseusers[$key][2];
+        return str_replace(array("\r\n","\n","\r"),'',$baseusers[$key][2]);
       }
     }
 
     return null;
   }
 
-  public function registerUser()
+  public function getIds()
   {
+    $baseusers = $this->getBaseUsers();
+    $ids = array();
+    foreach ( $baseusers as $key => $value )
+    {
+      $ids[] .= $baseusers[$key][0];
+    }
+
+    return $ids;
+  }
+
+  public function getLastId()
+  {
+    $ids = $this->getIds();
+    return max($ids);
+  }
+
+  public function registerUser($name,$password)
+  {
+    $usernames = $this->getUserNames();
+    foreach( $usernames as $val )
+    {
+      if ( $name == $val )
+      {
+        return false;
+      }
+    }
+
+    $newid = $this->getLastId() + 1;
+    $fp = fopen($this->path,"a");
+    fwrite($fp,$newid . ',' . $name . ',' . $password . "\n");
+    fclose($fp);
+
+    return true;
   }
 
   public function createUser($id)
