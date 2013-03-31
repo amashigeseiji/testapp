@@ -39,26 +39,7 @@ class UserAction
 
     if ( $this->isWebRequest('newname',$_POST) && $this->isWebRequest('newpassword',$_POST) )
     {
-      if ( null == ($newname = $this->getPostValue('newname')) )
-      {
-        $this->message['register'] = 'ユーザー名は必須項目です.';
-      }
-      elseif ( null == ($newpassword = $this->getPostValue('newpassword')) )
-      {
-        $this->message['register'] = 'パスワードは必須項目です.';
-      }
-      else
-      {
-        if ( false ==  $this->getBaseUserObj()->registerUser($newname,$newpassword) )
-        {
-          $this->message['register'] = 'ユーザー名が重複しています.';
-        }
-        else
-        {
-          $this->message['register'] = '新規ユーザーを登録しました.';
-          header("Location: /");
-        }
-      }
+      $this->entry();
     }
 
     $this->login($this->cookie);
@@ -110,6 +91,34 @@ class UserAction
     header("Location: /");
     $this->callTemplate('template/auth.php');
     $action = null;
+  }
+
+  public function entry()
+  {
+    if ( null == ($newname = $this->getPostValue('newname')) )
+    {
+      $this->message['register'] = 'ユーザー名は必須項目です.';
+      return false;
+    }
+    elseif ( null == ($newpassword = $this->getPostValue('newpassword')) )
+    {
+      $this->message['register'] = 'パスワードは必須項目です.';
+      return false;
+    }
+    else
+    {
+      if ( false ==  $this->getBaseUserObj()->registerUser($newname,$newpassword) )
+      {
+        $this->message['register'] = 'ユーザー名が重複しています.';
+        return false;
+      }
+      else
+      {
+        $this->message['register'] = '新規ユーザーを登録しました.';
+        header("Location: /");
+        return true;
+      }
+    }
   }
 
   public function getBaseUserObj()

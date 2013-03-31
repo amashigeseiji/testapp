@@ -68,12 +68,12 @@
       </tr>
 
       <tr>
-        <td class="title">name</td>
+        <td class="title">ログインネーム<br />(半角英数字)</td>
         <td><input type="text" name="newname"></td>
       </tr>
 
       <tr>
-        <td class="title">password</td>
+        <td class="title">パスワード<br />(半角英数字)</td>
         <td><input type="password" name="newpassword"></td>
       </tr>
 
