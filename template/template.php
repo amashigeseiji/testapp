@@ -10,22 +10,36 @@
   <div id="container">
 
     <div id="header">
-      <a href="/">test2.local</a>
-    </div>
 
-    <div id="logout">
-      <form action="/" method="post" name="fm1">
-        <input type="hidden" name="logout" value="<?php echo $this->getCookie('token') ?>" />
-        <a href="#" onclick="document.fm1.submit();">logout</a>
-      </form>
-      <?php echo 'login : ' . $this->getLoginUserName() ?>
-    </div>
+      <div id="logo">
+        <a href="/">test2.local</a>
+      </div>
 
-    <div id="sidebar">
-      <ul>
-        <?php //$this->renderSideBar(25); ?>
-      </ul>
-    </div>
+      <div id="logout">
+        <form action="/" method="post" name="fm1">
+          <input type="hidden" name="logout" value="<?php echo $this->getCookie('token') ?>" />
+          <a href="#" onclick="document.fm1.submit();">logout</a>
+        </form>
+        <?php echo 'login : ' . $this->getLoginUserName() ?>
+      </div>
+
+      <div id="navbar">
+        <ul class="menu">
+          <li class="nav">
+            <a href="#">title</a>
+            <ul>
+            <?php $titles = $this->obj->getTitles() ?>
+            <?php foreach($titles as $val){ ?>
+            <?php echo '<a href="?title='.$val.'"><li>'.$val.'</li></a>';} ?>
+            </ul>
+          </li>
+          <li class="nav">test</li>
+          <li class="nav">test</li>
+          <li class="nav">test</li>
+        </ul>
+      </div>
+
+    </div> <!-- header -->
 
     <?php if($this->pageid == ''): ?>
     <div id="write">

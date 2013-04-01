@@ -287,6 +287,18 @@ class BaseData extends BaseUser
     }
   }
 
+  public function getTitles()
+  {
+    $ids = $this->getIds();
+    $titles = array();
+    foreach ($ids as $id)
+    {
+      $titles[] .= $this->getDataById($id,'title');
+    }
+
+    return array_unique($titles);
+  }
+
   public function writeData($input,$token)
   {
     $this->message['write'] = '';

@@ -115,7 +115,7 @@ class UserAction
       else
       {
         $this->message['register'] = '新規ユーザーを登録しました.';
-        header("Location: /");
+        $this->callTemplate('template/auth.php');
         return true;
       }
     }
