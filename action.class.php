@@ -12,6 +12,7 @@ class Action extends UserAction
     $object,
     $pagetitle,
     $pageid,
+    $user = null,
     $message = array();
 
   function __construct()
@@ -35,9 +36,12 @@ class Action extends UserAction
     );
     $this->pageid = '';
     $this->posted_by = '';
+    $this->user = null;
 
     $this->createInstance();
 
+    $this->setUser();
+    var_dump($this->user);
     $this->setSubmited();
     //データの書き込み処理
     if ( null != $this->submited['delete'] )
@@ -46,7 +50,7 @@ class Action extends UserAction
     }
     if ( null != $this->submited['title'] && null != $this->submited['body'] )
     {
-      $token = $this->getCookie('token');
+      $token = parent::getCookie('token');
       $this->obj->writeData($this->submited,$token);
     }
 
@@ -61,7 +65,7 @@ class Action extends UserAction
 
     $this->setPageId();
     $this->setPageTitle();
-    $this->callTemplate($this->template);
+    parent::callTemplate($this->template);
   }
 
   private function createInstance()
@@ -92,8 +96,32 @@ class Action extends UserAction
 
   public function getLoginUserName()
   {
-    $token = $this->getCookie('token');
-    return $this->getNameByToken($token);
+    $token = parent::getCookie('token');
+    return parent::getNameByToken($token);
+  }
+
+  public function getUserId()
+  {
+    return parent::getBaseUserObj()->getUserIdByName($this->getLoginUserName());
+  }
+
+  public function getUser()
+  {
+    return $this->user;
+  }
+
+  public function setUser()
+  {
+    if ( null != parent::getCookie('token') )
+    {
+      $id = $this->getUserId();
+    }
+    else
+    {
+      $id = parent::getBaseUserObj()->getUserIdByName(parent::getPostValue('name'));
+    }
+
+    $this->user = parent::getUser($id);
   }
 
   public function setSubmited()

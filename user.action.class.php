@@ -1,12 +1,11 @@
 <?php
-include_once('action.class.php');
 class UserAction
 {
   public
     $user,
-    $baseuserobj,
     $usernames = array(),
     $cookie = null,
+    $login = 0,
     $message = array();
 
 
@@ -18,14 +17,12 @@ class UserAction
   public function initialize()
   {
     include_once('baseuser.class.php');
-    $this->baseuserobj = null;
     $this->action = null;
     $this->usernames = array();
     $this->user = null;
     $this->cookie = null;
+    $this->login = 0;
 
-
-    $this->baseuserobj = new BaseUser;
     $this->setUserNames();
 
     //$logout = $this->getGetValue('logout');
@@ -42,41 +39,49 @@ class UserAction
       $this->entry();
     }
 
-    $this->login($this->cookie);
+    if ( 'SUCCESS' == $this->login($this->cookie) )
+    {
+      include_once('action.class.php');
+      new Action;
+    }
   }
 
   public function login($cookie)
   {
+    //cookieを渡された場合
     if ( null != $cookie )
     {
       //cookieがtokenと一致すれば自動ログイン
       $name = $this->getNameByToken($cookie);
-
+      //渡されたcookieから名前が見つからなければログアウト処理
       if ( null == $name )
       {
         $this->logout($cookie);
         return;
       }
+      else
+      {
 
-      $id = $this->baseuserobj->getUserIdByName($name);
-      $this->user = $this->createUser($id);
-      $action = new Action;
+        return 'SUCCESS';
+      }
     }
+
+    //cookieがnullの場合
     elseif ( $this->isWebRequest('name',$_POST) && $this->isWebRequest('password',$_POST) )
     {
-      if ( true == $this->Authentication($_POST) )
+      if ( true == $this->auth($_POST['name'],$_POST['password']) )
       {
-        header("Location: /");
-        $action = new Action;
+
+        return 'SUCCESS';
       }
       else
       {
         $this->callTemplate('template/auth.php');
       }
     }
+
     else
     {
-      $this->user = null;
       $this->callTemplate('template/auth.php');
     }
   }
@@ -85,12 +90,10 @@ class UserAction
   {
     //ログアウト処理ではクッキーを削除
     $this->deleteToken($cookie);
-    $this->user = null;
     $this->cookie = $this->getCookie('token');
     //ログインページを表示する
     header("Location: /");
     $this->callTemplate('template/auth.php');
-    $action = null;
   }
 
   public function entry()
@@ -181,33 +184,19 @@ class UserAction
     }
   }
 
-  public function Authentication($post)
+  public function getUser($id)
   {
-    if ( isset($post['name']) && isset($post['password']) )
-    {
-      $name = $post['name'];
-      $id = $this->baseuserobj->getUserIdByName($name);
-
-      if ( null != $this->getTokenByName($_POST['name']) )
-      {
-        unlink("data/token/$name");
-      }
-
-      if ( $this->auth($post['name'],$post['password']) == true )
-      {
-        $this->user = $this->createUser($id);
-        return true;
-      }
-      else
-      {
-        return false;
-      }
-    }
-    return false;
+    return $this->getBaseUserObj()->createUser($id);
   }
 
   public function auth($name,$password)
   {
+    //入力された名前から取得できるtokenが存在する場合は削除
+    if ( null != $this->getTokenByName($name) )
+    {
+      unlink("data/token/$name");
+    }
+
     if ( empty($name) )
     {
       $this->message['auth'] = '名前を入力してください。';
@@ -219,9 +208,9 @@ class UserAction
       return false;
     }
 
-    if ( $id = $this->baseuserobj->getUserIdByName($name) );
+    if ( $id = $this->getBaseUserObj()->getUserIdByName($name) );
     {
-      if ( $this->baseuserobj->getPasswordById($id) == $password )
+      if ( $this->getBaseUserObj()->getPasswordById($id) == $password )
       {
         return true;
       }
@@ -289,7 +278,7 @@ class UserAction
 
   public function setUserNames()
   {
-    $baseusers = $this->baseuserobj->getBaseUsers();
+    $baseusers = $this->getBaseUserObj()->getBaseUsers();
     foreach ( $baseusers as $key => $value )
     {
       $this->usernames[] .= $baseusers[$key][1];
@@ -312,17 +301,4 @@ class UserAction
     include_once($file);
   }
 
-  public function createUser($id)
-  {
-    if ( $this->baseuserobj->isUser($id) == true )
-    {
-      include_once('user.class.php');
-      $user = new User;
-      $user->setUserId($id);
-      $user->setName($id);
-      $user->setToken();
-
-      return $user;
-    }
-  }
 }

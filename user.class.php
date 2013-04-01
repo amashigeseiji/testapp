@@ -5,6 +5,7 @@ class User extends BaseUser
     $userid = null,
     $name = null,
     //$password,
+    $image = '',
     $token = null;
 
   function __construct()
@@ -19,6 +20,16 @@ class User extends BaseUser
   public function setName($id)
   {
     $this->name = $this->getUserNameById($id);
+  }
+
+  public function setImage($image)
+  {
+    $this->image = $image;
+  }
+
+  public function getImage()
+  {
+    return $this->image;
   }
 
   public function getName()

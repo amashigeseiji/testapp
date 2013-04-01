@@ -172,6 +172,7 @@ class BaseUser
       $user = new User;
       $user->setUserId($id);
       $user->setName($id);
+      $user->setImage('data/'.$user->getName().'.jpg');
       $user->setToken();
 
       return $user;

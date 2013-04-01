@@ -1,4 +1,3 @@
-<?php if(null == $this->user): ?>
 <?php $entry = 0 ?>
 <?php if(array_key_exists('entry',$_GET)): ?>
 <?php $entry = 1 ?>
@@ -20,7 +19,7 @@
       <?php if(array_key_exists('auth',$this->message)||array_key_exists('register',$this->message)): ?>
         <td class="error" colspan="2">
         <?php echo $this->message['auth'] ?>
-        <?php echo $this->message['register'] ?>
+        <?php //echo $this->message['register'] ?>
         </td>
       <?php endif; ?>
 
@@ -94,4 +93,3 @@
 
 </body>
 </html>
-<?php endif; ?>

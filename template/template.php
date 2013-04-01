@@ -17,10 +17,10 @@
 
       <div id="logout">
         <form action="/" method="post" name="fm1">
-          <input type="hidden" name="logout" value="<?php echo $this->getCookie('token') ?>" />
+          <input type="hidden" name="logout" value="<?php echo $this->getUser()->getToken() ?>" />
           <a href="#" onclick="document.fm1.submit();">logout</a>
         </form>
-        <?php echo 'login : ' . $this->getLoginUserName() ?>
+        <?php echo 'login : ' . $this->getUser()->getName() ?>
       </div>
 
       <div id="navbar">
