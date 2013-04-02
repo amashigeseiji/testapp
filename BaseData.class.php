@@ -1,5 +1,4 @@
 <?php
-include_once('baseuser.class.php');
 class BaseData extends BaseUser
 {
   private
