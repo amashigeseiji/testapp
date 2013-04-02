@@ -41,7 +41,6 @@ class Action extends UserAction
     $this->createInstance();
 
     $this->setUser();
-    var_dump($this->user);
     $this->setSubmited();
     //データの書き込み処理
     if ( null != $this->submited['delete'] )

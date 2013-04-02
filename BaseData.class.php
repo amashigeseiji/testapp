@@ -1,4 +1,5 @@
 <?php
+include_once('baseuser.class.php');
 class BaseData extends BaseUser
 {
   private
@@ -52,7 +53,6 @@ class BaseData extends BaseUser
     {
       $this->basedata[$i] = explode(",", $lines[$i]);
     }
-
   }
 
   public function setPath($file)

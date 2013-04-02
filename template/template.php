@@ -1,3 +1,4 @@
+<!-- vim: set foldmethod=marker: -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,6 +10,7 @@
 <body>
   <div id="container">
 
+    <!-- ヘッダー領域{{{ -->
     <div id="header">
 
       <div id="logo">
@@ -40,6 +42,7 @@
       </div>
 
     </div> <!-- header -->
+    <!-- ヘッダー領域ここまで}}} -->
 
     <?php if($this->pageid == ''): ?>
     <div id="write">

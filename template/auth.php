@@ -1,3 +1,4 @@
+<!-- vim: set foldmethod=marker: -->
 <?php $entry = 0 ?>
 <?php if(array_key_exists('entry',$_GET)): ?>
 <?php $entry = 1 ?>
@@ -11,6 +12,7 @@
 </head>
 <body>
 
+<!-- ログイン画面{{{ -->
 <?php if($entry == 0): ?>
 <div id="auth">
   <form action="#" method="post">
@@ -51,7 +53,9 @@
   </div>
 
 </div>
+<!-- ログイン画面ここまで}}} -->
 
+<!-- 新規登録画面{{{ -->
 <?php elseif($entry == 1): ?>
 <div id="newentry">
   <form action="#" method="post">
@@ -68,18 +72,18 @@
       </tr>
 
       <tr>
-        <td class="title">ログインネーム<br />(半角英数字)</td>
-        <td><input type="text" name="newname"></td>
+        <td class="title">アカウント名<br />(半角英数字)</td>
+        <td><input type="text" name="newname" size="25" placeholder="登録したいアカウント名を入力"></td>
       </tr>
 
       <tr>
         <td class="title">パスワード<br />(半角英数字)</td>
-        <td><input type="password" name="newpassword"></td>
+        <td><input type="password" name="newpassword" size="25" placeholder="パスワードを入力"></td>
       </tr>
 
       <tr>
         <td class="title" colspan="2">
-          <input type="submit" value="登録" />
+          <input type="submit" value="登録する" />
         </td>
       </tr>
 
@@ -90,6 +94,7 @@
 
 </div>
 <?php endif; ?>
+<!-- 新規登録画面ここまで}}} -->
 
 </body>
 </html>
